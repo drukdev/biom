@@ -5,7 +5,7 @@ import { config } from '../config/config';
 import { validationSchema } from '../config/validation';
 import { TerminusModule } from '@nestjs/terminus';
 import { HealthController } from './health/health.controller';
-import { ExceptionHandler } from './common/exception.handler';
+import { ExceptionHandler } from './commons/exception.handler';
 import { PersonModule } from './comparisionService/module';
 
 @Module({

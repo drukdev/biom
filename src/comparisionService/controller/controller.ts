@@ -1,44 +1,69 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
+  HttpException,
+  HttpStatus,
   Inject,
   InternalServerErrorException,
   Param,
   Post,
+  Req,
   UploadedFile,
   UseInterceptors} from '@nestjs/common';
-import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import logger from 'lib/logger';
+import base64ToImage from 'base64-to-image';
 import { BiometricService } from '../services/biometricService';
-
-import { ResponseType } from 'src/common/response';
-import { statusCode } from 'src/common/status.codes';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { PersonDTO } from '../entities/person';
+import { PersonDTO } from '../dto/person';
+import { ResponseService } from 'src/response/src';
+import { response } from 'express';
+import { CommonConstants } from 'src/commons/constants';
+import { ApiBody } from '@nestjs/swagger';
 
 @Controller()
 export class PersonController {
   constructor(private readonly biometricService: BiometricService) {}
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
-  async compareFace(@UploadedFile() file: Express.Multer.File, @Body() person: PersonDTO) {
+  async compareFace(@Body() newPerson: any ) {
     try {
+      let result: ResponseService = new ResponseService();
       logger.info('comparing faces');
-      console.log(file.buffer);
-      console.log("cid : ", person.useCid);
-      const result = await this.biometricService.compareImage(file.buffer, person, person.useCid);
+      
+      if((typeof newPerson.firstName) == 'undefined' || (typeof newPerson.lastName) == 'undefined' || 
+          (typeof newPerson.middleName) == 'undefined' || (typeof newPerson.cidNumber) == 'undefined') {
+        console.log("in if")
+        return result.response(
+          'Mandatory fields are not present',
+          false,
+          {},
+          CommonConstants.RESP_BAD_REQUEST
+      );
+      }
+
+      // Base64 string to image
+      const imgBuffer: Buffer = Buffer.from(newPerson.image, "base64");
+
+      result = await this.biometricService.compareImage(imgBuffer, newPerson, newPerson.useCid);
       console.log("result", result);
-      const res: ResponseType = {
-        statusCode: statusCode.INSERT,
-        message: 'Response',
-        data: result
-      };
-      return res;
+      return result;
       //todo
     } catch (error) {
       throw new InternalServerErrorException('some Error');
     }
+  }
+
+
+  @Post("/user")
+  @ApiBody({ type: PersonDTO })
+  savePerson(@Body() person: any) {
+    try {
+      return person;
+    } catch (error) {
+      console.error(error);
+    }
+    
   }
 }

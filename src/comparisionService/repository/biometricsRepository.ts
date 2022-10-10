@@ -1,38 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import * as jimp from 'jimp'; 
 import { PNG } from 'pngjs'; 
-import * as faceapi from 'face-api.js'; 
 import pixelmatch from 'pixelmatch';
-
-// const fs = require('fs');
-// const path = require('path');
-// const { tinyFaceDetector } = require('face-api.js');
-
+import qs from 'qs';
 import { PrismaService } from '../../prisma/prisma.service';
-import { buffer } from 'stream/consumers';
-import { PersonDTO } from '../entities/person';
-import { resourceLimits } from 'worker_threads';
-import { resolve } from 'path';
+import { PersonDTO } from '../dto/person';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class BiometricRepository {
+
+    private readonly logger = new Logger("biometricRepository");
     
-    constructor(private readonly prismaService: PrismaService) {}
+    constructor(private readonly prismaService: PrismaService, private readonly httpService: HttpService,
+        private configService: ConfigService) {}
 
     public async compareImage(image1: Buffer, image2) {
-        const img1Buffer: Buffer = await this.imgToBuffer(image1).then(value => {
-            return value
-        });
-        const img2Buffer: Buffer = await this.imgToBuffer(image2).then(value => {return value});
-        return await this.computeDiff(img1Buffer, img2Buffer).then(value => {
-            return value;
-        });
+            
+        try {
+            if(image1 == undefined || image2 == undefined) {
+                throw new HttpException({
+                    status: 500,
+                    error: "message",
+                }, 500);
+            } else {
+
+                // facecrop(image2,'./output.jpg', "image/jpeg", 0.95, 50);
+                const img1Buffer: Buffer = await this.imgToBuffer(image1).then(value => {
+                    return value
+                });
+                const img2Buffer: Buffer = await this.imgToBuffer(image2).then(value => {return value});
+                return await this.computeDiff(img1Buffer, img2Buffer).then(value => {
+                    return value;
+                });
+            }
+        } catch(error) {
+            this.logger.error(error)
+        }
     }
 
     async imgToBuffer(image: Buffer): Promise<Buffer> {
 
         return new Promise( async (resolve, reject) => {
-            console.log(typeof image)
+            console.log("typeof image",typeof image)
             jimp.read(image).then(img => 
                 {
                     img.resize(280, 280)
@@ -75,9 +86,6 @@ export class BiometricRepository {
         return compatibility;
     }
 
-    getPersonRecord(person: PersonDTO) {
-        return new PersonDTO();
-        throw new Error('Method not implemented.');
-    }
+    
 
 }

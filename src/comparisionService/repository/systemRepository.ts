@@ -23,7 +23,7 @@ export class SystemRepository {
                 const payload = new ClientCredentialTokenPayloadDto();
                 payload.client_id = this.configService.get('CLIENT_ID') || '';
                 payload.client_secret = this.configService.get('CLIENT_SECRET') || '';
-                payload.grant_type = "client_credentials";
+                payload.grant_type = this.configService.get('GRANT_TYPE');
                 
                 const config = {
                     headers: {

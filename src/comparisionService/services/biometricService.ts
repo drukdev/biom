@@ -23,7 +23,7 @@ export class BiometricService {
     let personImg: any;
     let result: boolean = false;
     let returnResult: ResponseService = new ResponseService();
-    personImg = `${process.env.PWD}/src/comparisionService/services/extra/obama2.jpeg`;
+    personImg = `${process.env.PWD}/src/comparisionService/services/temporaryUpload/obama2.jpeg`;
 
     result = await this.systemRepository.getPersonRecord(person) || false;
     console.log("person record matching result : ", result);

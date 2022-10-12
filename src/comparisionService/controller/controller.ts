@@ -21,12 +21,16 @@ import { ResponseService } from 'src/response/src';
 import { response } from 'express';
 import { CommonConstants } from 'src/commons/constants';
 import { ApiBody } from '@nestjs/swagger';
+import { MessagePattern } from '@nestjs/microservices';
 
 @Controller()
 export class PersonController {
   constructor(private readonly biometricService: BiometricService) {}
 
-  @Post('upload')
+  @Post('validate')
+  @MessagePattern({
+    endpoint: 'biometricService/compareBiometrics'
+  })
   async compareFace(@Body() newPerson: any ) {
     try {
       let result: ResponseService = new ResponseService();
@@ -53,17 +57,5 @@ export class PersonController {
     } catch (error) {
       throw new InternalServerErrorException('some Error');
     }
-  }
-
-
-  @Post("/user")
-  @ApiBody({ type: PersonDTO })
-  savePerson(@Body() person: any) {
-    try {
-      return person;
-    } catch (error) {
-      console.error(error);
-    }
-    
   }
 }

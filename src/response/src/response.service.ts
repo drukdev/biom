@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class ResponseService {
+export class ResponseService
+{
 
     message: string;
     data: any;
     success: boolean;
     code: number;
 
-    public response(message: string, success: boolean, data?: any, code?: number): ResponseService {
+    public response (message: string, success: boolean, data?: any, code?: number): ResponseService
+    {
         const response: ResponseService = new ResponseService();
         response.message = message;
         response.data = data;

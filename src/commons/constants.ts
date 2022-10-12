@@ -1,5 +1,6 @@
 export enum CommonConstants {
   FCM_URL = 'http://url',
+  NATS_CLIENT = 'NATS_CLIENT',
   // Error and Success Responses from POST and GET calls
   RESP_ERR_HTTP_INVALID_HEADER_VALUE = 'ERR_HTTP_INVALID_HEADER_VALUE',
   RESP_ERR_401 = 401,     // equivalent to 401 (error) returned from HTTP call

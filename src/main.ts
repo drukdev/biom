@@ -14,7 +14,6 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.NATS,
     options: {
-      //: 'customers',
       url: configService.get('nats')?.url,
       // deserializer: new InboundMessageIdentityDeserializer(),
       // serializer: new OutboundResponseIdentitySerializer(),

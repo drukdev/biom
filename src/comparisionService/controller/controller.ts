@@ -1,40 +1,27 @@
 import {
-  BadRequestException,
   Body,
   Controller,
-  Get,
-  HttpException,
-  HttpStatus,
-  Inject,
   InternalServerErrorException,
-  Param,
-  Post,
-  Req,
-  UploadedFile,
-  UseInterceptors} from '@nestjs/common';
-import logger from 'lib/logger';
-import base64ToImage from 'base64-to-image';
+  Logger,
+  Post} from '@nestjs/common';
 import { BiometricService } from '../services/biometricService';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { PersonDTO } from '../dto/person';
 import { ResponseService } from 'src/response/src';
-import { response } from 'express';
 import { CommonConstants } from 'src/commons/constants';
-import { ApiBody } from '@nestjs/swagger';
 import { MessagePattern } from '@nestjs/microservices';
 
 @Controller()
 export class PersonController {
+  private readonly logger = new Logger("PersonController");
   constructor(private readonly biometricService: BiometricService) {}
 
   @Post('validate')
   @MessagePattern({
     endpoint: 'biometricService/compareBiometrics'
   })
-  async compareFace(@Body() newPerson: any ) {
+  async compareFace(@Body() newPerson: any) {
     try {
       let result: ResponseService = new ResponseService();
-      logger.info('comparing faces');
+      this.logger.log('comparing faces');
       
       if((typeof newPerson.firstName) == 'undefined' || (typeof newPerson.lastName) == 'undefined' || 
           (typeof newPerson.middleName) == 'undefined' || (typeof newPerson.cidNumber) == 'undefined') {

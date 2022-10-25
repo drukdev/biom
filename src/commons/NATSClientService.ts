@@ -7,10 +7,4 @@ import { CommonConstants } from './constants';
 @Injectable()
 export default class NATSClientService {
     constructor(@Inject(CommonConstants.NATS_CLIENT) private readonly natsClient: ClientProxy) {}
-
-    compareBiometrics(data: PersonDTO) {
-        const pattern = {endpoint:'biometricService/compareBiometrics'}
-        const payload = data;
-        return lastValueFrom(this.natsClient.send(pattern, payload));
-    }
 }

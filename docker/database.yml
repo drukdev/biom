@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  foundational-issuer:
+    image: postgres
+    restart: always
+    container_name: foundational-issuer
+    volumes:
+      - $PWD/data/db/foundational-issuer-postgres/:/var/lib/postgresql/
+    ports:
+    - 5452:5432
+    environment:
+      - POSTGRES_DB=ndi_foundation_issuer_db
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root

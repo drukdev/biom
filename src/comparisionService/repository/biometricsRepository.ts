@@ -111,7 +111,7 @@ export class BiometricRepository
                 width,
                 height,
                 {
-                    threshold: 0.2,
+                    threshold: 0.4,
                 }
             );
 

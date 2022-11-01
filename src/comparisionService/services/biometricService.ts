@@ -20,7 +20,7 @@ export class BiometricService
     this.biometricRepo = new BiometricRepository(this.prismaService, this.httpService, this.configService);
     this.systemRepository = new SystemRepository(this.prismaService, this.httpService, this.configService);
   }
-  public async compareImage (image: Buffer, person: PersonDTO, useCid: boolean)
+  public async compareImage (image: Buffer, person: PersonDTO)
   {
     this.logger.log("Start to compare images")
     let personImg: Buffer;
@@ -42,15 +42,20 @@ export class BiometricService
         return value;
       }) || '';
       result = (compatibility > 75) ? true : false;
-      returnResult.code = CommonConstants.RESP_SUCCESS_201;
+      this.logger.debug(`result : ${result}`);
+      returnResult.statusCode = CommonConstants.RESP_SUCCESS_200;
+      returnResult.message = 'success'
+      if(!result) {
+        this.logger.log(`result of comparision ${result}`);
+        returnResult.statusCode = CommonConstants.RESP_BAD_REQUEST;
+        returnResult.message = 'Invalid Biometric'
+      } 
       returnResult.data = { compatibility };
-      returnResult.success = result;
     } catch (error)
     {
-      returnResult.code = CommonConstants.RESP_ERR_500;
+      returnResult.statusCode = CommonConstants.RESP_ERR_500;
       returnResult.data = {};
       returnResult.message = CommonConstants.SERVER_ERROR;
-      returnResult.success = false;
     }
     return returnResult;
   }

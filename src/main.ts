@@ -19,8 +19,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('NDI Foundational Issuer APIs')
-    .setDescription('NDI Foundational Issuer Module')
+    .setTitle('Biometric Service')
+    .setDescription('NDI Biometric Service Module')
     .setVersion('1.0')
     .build();
 

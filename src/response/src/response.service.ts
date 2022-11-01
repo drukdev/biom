@@ -3,19 +3,18 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class ResponseService
 {
-
+    statusCode: number;
     message: string;
-    data: any;
-    success: boolean;
-    code: number;
+    data?:any;
+    error?: any;
 
-    public response (message: string, success: boolean, data?: any, code?: number): ResponseService
+    public response (message: string, statusCode?: number, data?: any, error?: any): ResponseService
     {
         const response: ResponseService = new ResponseService();
         response.message = message;
         response.data = data;
-        response.success = success;
-        response.code = code || 500;
+        response.statusCode = statusCode || 500;
+        response.error = error;
         return response;
     }
 }

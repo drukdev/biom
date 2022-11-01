@@ -1,123 +1,139 @@
-import { IsString, IsNotEmpty, IsDate, IsBoolean, MaxLength, ValidateIf } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { string } from 'joi';
-import { Transform, TransformFnParams, Type } from '@nestjs/class-transformer';
+import { IsString, IsNotEmpty, IsDate, IsBoolean, MaxLength, ValidateIf, isString, isNotEmpty, IsEnum } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IdTypes } from 'src/commons/IdTypes';
+import { BloodType } from 'src/commons/bloodType';
 
 export class PersonDTO {
-  @IsString()
-  @ApiProperty()
+
+  @ApiPropertyOptional()
   id: string;
 
-  @IsString()
-  @ApiProperty()
+  @ApiProperty({
+    name: 'fullName' || 'FullName',
+    type: String
+  })
   @IsNotEmpty()
-  firstName: string;
+  fullName: string;
 
   @IsString()
-  @ApiProperty()
-  @IsNotEmpty()
-  middleName: string;
-
-  @IsString()
-  @ApiProperty()
-  @IsNotEmpty()
-  lastName: string;
-
-  @IsString()
-  @ApiProperty()
+  @ApiProperty({
+    name: 'gender',
+    type: String
+  })
   @IsNotEmpty()
   gender: string;
+
+  @IsEnum(BloodType)
+  @ApiProperty({
+    name: 'bloodType',
+    enum : BloodType
+  })
+  @IsNotEmpty()
+  bloodType: BloodType;
   
   @IsString()
-  @ApiProperty()
-  fatherName: string;
-  
-  @IsString()
-  @ApiProperty()
-  mobileNumber: string;
-  
-  @IsString()
-  @ApiProperty()
-  motherName: string;
-
-  @IsString()
-  @ApiProperty()
-  occupationDesc: string;
-
-  @IsString()
-  @ApiProperty()
-  dzongkhagSerialno: string;
-
-  @IsString()
-  @ApiProperty()
-  gewogSerialno: string;
-
-  @IsString()
-  @ApiProperty()
+  @ApiProperty({
+    name: 'gewog' || 'gewogName',
+    type: String
+  })
   gewogName: string;
 
   @IsString()
-  @ApiProperty()
-  permanentHouseno: string;
-
-  @IsString()
-  @ApiProperty()
-  permanentThramno: string;
-
-  @IsString()
-  @ApiProperty()
-  permanentVillageserialno: string;
-
-  @IsString()
-  @ApiProperty()
-  permanentVillagename: string;
-
-  @IsString()
-  @ApiProperty()
-  palceOfbirth: string;
-
-  @IsString()
-  @ApiProperty()
-  countryName: string;
-
-  @IsString()
-  @ApiProperty()
-  firstNamebh: string;
-
-  @IsString()
-  @ApiProperty()
-  middleNamebh: string;
-
-  @IsString()
-  @ApiProperty()
-  lastNamebh: string;
-
-  @IsString()
-  @ApiProperty()
-  householdNo: string;
-
-  @IsString()
-  @ApiProperty()
+  @ApiProperty({
+    name: 'dzongkhag' || 'dzongkhagName',
+    type: String
+  })
+  @IsNotEmpty()
   dzongkhagName: string;
 
+  @ApiProperty({
+    name: 'village' || 'villagename',
+    type: String
+  })
+  villagename: string;
+
+  @IsEnum(IdTypes)
+  @ApiProperty({
+    name: 'idType',
+    enum: IdTypes
+  })
   @IsNotEmpty()
-  dob: Date;
+  idType: IdTypes;
 
-  @IsDate()
+  @ApiProperty({
+    name: 'idNumber',
+    type: Number
+  })
   @IsNotEmpty()
-  firstissueDate: Date;
+  idNumber: string;
 
-  @IsString()
-  @ApiProperty()
-  idType: string;
-
-  @IsString()
-  @ApiProperty()  // @IsNotEmpty()  
-  cidNumber: string;
-
+  @ApiPropertyOptional({
+    name: 'image',
+    type: String
+  })
   image: string;
 
-  @IsBoolean()
-  useCid: boolean
-}
+  @ApiProperty({
+    name: 'isBhutanese',
+    type: Boolean
+  })
+  @IsNotEmpty()
+  isBhutanese: boolean
 
+  @ApiProperty({
+    name: 'country' || 'Country',
+    type: String
+  })
+  country: string
+
+  @ApiPropertyOptional({
+    name: 'UniqueID',
+    type: String
+  })
+  uniqueID: string
+
+  @ApiProperty({
+    name: 'WorkPermit',
+    type: Number
+  })
+  workPermit: number
+  
+  @ApiProperty({
+    name: 'DOB' || 'dob',
+    type: Date
+  })
+  dob: Date
+  
+  @ApiProperty({
+    name: 'Job_Category' || 'jobCategory',
+    type: String
+  })
+  jobCategory: string
+
+  @ApiProperty({
+    name: 'EmployerName' || 'employerName',
+    type: String
+  })
+  employerName: string
+
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  fatherName: string;
+  mobileNumber: string;
+  motherName: string;
+  occupationDesc: string;
+  dzongkhagSerialno: number;
+  gewogSerialno: number;
+  permanentHouseno: string;
+  permanentThramno: string;
+  permanentVillageserialno: number;
+  permanentVillagename: string;
+  palceOfbirth: string;
+  countryName: string;
+  firstNamebh: string;
+  middleNamebh: string;
+  lastNamebh: string;
+  householdNo: number;
+  firstissueDate: Date;
+}

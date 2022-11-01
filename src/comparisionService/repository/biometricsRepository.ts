@@ -75,7 +75,7 @@ export class BiometricRepository
                         {
                             if (err)
                             {
-                                console.log(`error converting image url to buffer: ${ err }`);
+                                this.logger.error(`error converting image url to buffer: ${ err }`);
                                 reject(err)
                             }
                             resolve(buf)
@@ -111,14 +111,14 @@ export class BiometricRepository
                 width,
                 height,
                 {
-                    threshold: 0.5,
+                    threshold: 0.4,
                 }
             );
 
             const compatibility: number = 100 - (difference * 100) / (width * height);
-            console.log(`${ difference } pixels differences`);
-            console.log("Compatibility: ${", compatibility);
-            console.log('< Completed comparing two images');
+            this.logger.log(`${ difference } pixels differences`);
+            this.logger.log("Compatibility: ${", compatibility);
+            this.logger.log('< Completed comparing two images');
             return compatibility;
 
         } catch (error)

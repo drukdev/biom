@@ -8,6 +8,7 @@ import { BiometricService } from '../services/biometricService';
 import { ResponseService } from 'src/response/src';
 import { CommonConstants } from 'src/commons/constants';
 import { MessagePattern } from '@nestjs/microservices';
+import { PersonDTO } from '../dto/person';
 
 @Controller()
 export class PersonController {
@@ -18,27 +19,26 @@ export class PersonController {
   @MessagePattern({
     endpoint: 'biometricService/compareBiometrics'
   })
-  async compareFace(@Body() newPerson: any) {
+  async compareFace(@Body() newPerson: PersonDTO) {
     try {
       let result: ResponseService = new ResponseService();
-      this.logger.log('comparing faces');
+      this.logger.log(`comparing faces : ${JSON.stringify(newPerson)}`);
       
-      if((typeof newPerson.firstName) == 'undefined' || (typeof newPerson.lastName) == 'undefined' || 
-          (typeof newPerson.middleName) == 'undefined' || (typeof newPerson.cidNumber) == 'undefined') {
-        console.log("in if")
+      if((typeof newPerson.fullName) == 'undefined' || (typeof newPerson.idNumber) == 'undefined') {
+        this.logger.log("in if")
         return result.response(
-          'Mandatory fields are not present',
-          false,
-          {},
-          CommonConstants.RESP_BAD_REQUEST
+          '',
+          CommonConstants.RESP_BAD_REQUEST,
+          newPerson,
+          'Mandatory fields are not present'
       );
       }
 
       // Base64 string to image
       const imgBuffer: Buffer = Buffer.from(newPerson.image, "base64");
 
-      result = await this.biometricService.compareImage(imgBuffer, newPerson, newPerson.useCid);
-      console.log("result", result);
+      result = await this.biometricService.compareImage(imgBuffer, newPerson);
+      this.logger.log("result", result);
       return result;
       //todo
     } catch (error) {

@@ -8,26 +8,19 @@ import logger from '../lib/logger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe());
   const configService = app.get(ConfigService);
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.NATS,
     options: {
-      url: configService.get('nats')?.url,
-      // deserializer: new InboundMessageIdentityDeserializer(),
-      // serializer: new OutboundResponseIdentitySerializer(),
+      url: configService.get('NATS_CLIENT')?.url
     },
   });
-
-  app.enableVersioning({
-    defaultVersion: ['1', '2'],
-    type: VersioningType.URI,
-  });
+  app.useGlobalPipes(new ValidationPipe());
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('NDI Foundational Issuer APIs')
-    .setDescription('NDI Foundational Issuer Module')
+    .setTitle('Biometric Service')
+    .setDescription('NDI Biometric Service Module')
     .setVersion('1.0')
     .build();
 
@@ -36,7 +29,6 @@ async function bootstrap() {
   await app.startAllMicroservices();
   await app.listen(configService.get('PORT') || 3000, () => {
     logger.info(`Listening on Port:`+configService.get('PORT') || 3000 );
-    //console.log('Serving running on port', );
   });
 }
 bootstrap();

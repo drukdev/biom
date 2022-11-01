@@ -21,11 +21,10 @@ export class PersonController {
   async compareFace(@Body() newPerson: any) {
     try {
       let result: ResponseService = new ResponseService();
-      this.logger.log('comparing faces');
+      this.logger.log(`comparing faces : ${JSON.stringify(newPerson)}`);
       
-      if((typeof newPerson.firstName) == 'undefined' || (typeof newPerson.lastName) == 'undefined' || 
-          (typeof newPerson.middleName) == 'undefined' || (typeof newPerson.cidNumber) == 'undefined') {
-        console.log("in if")
+      if((typeof newPerson.fullName) == 'undefined' || (typeof newPerson.idNumber) == 'undefined') {
+        this.logger.log("in if")
         return result.response(
           'Mandatory fields are not present',
           false,
@@ -38,7 +37,7 @@ export class PersonController {
       const imgBuffer: Buffer = Buffer.from(newPerson.image, "base64");
 
       result = await this.biometricService.compareImage(imgBuffer, newPerson, newPerson.useCid);
-      console.log("result", result);
+      this.logger.log("result", result);
       return result;
       //todo
     } catch (error) {

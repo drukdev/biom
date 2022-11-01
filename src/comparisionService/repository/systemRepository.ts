@@ -15,9 +15,9 @@ export class SystemRepository {
     constructor(private readonly prismaService: PrismaService, private readonly httpService: HttpService,
         private configService: ConfigService) {}
         
-        async getPersonRecord(person: PersonDTO) {
-          console.log("\n---SystemRepository-----here-----");
-            if(person.cidNumber != null) {
+        async getCitizenImg(person: PersonDTO) {
+          this.logger.log(`start to get Citizen Image`)
+            if(person.idNumber != null) {
                 // Get access token
                 const sso_url: string = this.configService.get('STAGE_DIIT_SSO') || '';
                 const payload = new ClientCredentialTokenPayloadDto();
@@ -42,13 +42,20 @@ export class SystemRepository {
                   });
     
                 if(tokenResponse != null || tokenResponse != undefined) {
-                    const fetchedPerson: PersonDTO = await this.callSystemToGetPerson(tokenResponse, person.cidNumber);
-                    if(fetchedPerson.firstName == person.firstName && 
-                      fetchedPerson.lastName == person.lastName) {
-                      return true;
+                    const fetchedPerson: PersonDTO = await this.callSystemToGetPerson(tokenResponse, person.idNumber);
+                    this.logger.log(`fetchedPerson : ${fetchedPerson}`)
+                    if(fetchedPerson.image == undefined || fetchedPerson.image == null) {
+                      throw new HttpException(
+                        {
+                          statusCode: HttpStatus.NOT_FOUND,
+                          error: 'Citizen data not found. Please update your record',
+                        },
+                        HttpStatus.NOT_FOUND
+                      );
                     } else {
-                      return false;
-                    }
+                      this.logger.log(`citizen image : ${fetchedPerson.image.length}`)
+                      return fetchedPerson.image;
+                    } 
                 }
             }
         }
@@ -56,10 +63,10 @@ export class SystemRepository {
     
         async callSystemToGetPerson(token: string, cidNumber: string) {
     
-            console.log("started calling dcrc")
-            let dcrcUrl: string = this.configService.get("STAGE_URL_DCRC") || '';
+            this.logger.log("started calling dcrc")
+            let dcrcUrl: string = this.configService.get("CITIZEN_IMG") || '';
             dcrcUrl = `${dcrcUrl}${cidNumber}`;
-            console.log("started calling dcrc : url : ", dcrcUrl)
+            this.logger.log("started calling dcrc : url : ", dcrcUrl)
             try {
                 let response: PersonDTO = await lastValueFrom(this.httpService.get(dcrcUrl, { headers: { "Authorization": `Bearer ${token}` }})
                 .pipe(
@@ -67,10 +74,8 @@ export class SystemRepository {
                         return response.data
                     })
                   )).then((data) => {
-                    console.log("data : ", data);
-                    return data["citizendetails"]["citizendetail"][0];
+                    return data["citizenimages"]["citizenimage"][0];
                   });
-                  console.log("Person found : ", response);
     
                   return response;
                 }  catch (error) {

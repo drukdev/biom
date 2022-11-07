@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import * as jimp from 'jimp';
 import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
-import { PrismaService } from '../../prisma/prisma.service';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 
@@ -12,12 +11,11 @@ export class BiometricRepository
 
     private readonly logger = new Logger("biometricRepository");
 
-    constructor(private readonly prismaService: PrismaService, private readonly httpService: HttpService,
+    constructor(private readonly httpService: HttpService,
         private configService: ConfigService) { }
 
     public async compareImage (image1: Buffer, image2)
     {
-
         try
         {
             if (image1 == undefined || image2 == undefined)
@@ -28,13 +26,11 @@ export class BiometricRepository
                 }, 500);
             } else
             {
-
-                // facecrop(image2,'./output.jpg', "image/jpeg", 0.95, 50);
-                const img1Buffer: Buffer | undefined = await this.imgToBuffer(image1).then(value =>
+                const img1Buffer: Buffer | undefined = await this.resizeUpdateImage(image1).then(value =>
                 {
                     return value
                 });
-                const img2Buffer: Buffer | undefined = await this.imgToBuffer(image2).then(value => { return value });
+                const img2Buffer: Buffer | undefined = await this.resizeUpdateImage(image2).then(value => { return value });
                 if (img1Buffer != undefined && img2Buffer != undefined)
                 {
                     return await this.computeDiff(img1Buffer, img2Buffer).then(value =>
@@ -49,9 +45,8 @@ export class BiometricRepository
         }
     }
 
-    async imgToBuffer (image: Buffer): Promise<Buffer | undefined>
+    async resizeUpdateImage (image: Buffer): Promise<Buffer | undefined>
     {
-
         try
         {
             return new Promise(async (resolve, reject) =>
@@ -107,11 +102,11 @@ export class BiometricRepository
             const difference = pixelmatch(
                 img1.data,
                 img2.data,
-                diff.data,
+                null,
                 width,
                 height,
                 {
-                    threshold: 0.4,
+                    threshold: 0.45,
                 }
             );
 

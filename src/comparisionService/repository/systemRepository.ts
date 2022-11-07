@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import * as qs from 'qs';
-import { PrismaService } from '../../prisma/prisma.service';
 import { PersonDTO } from '../dto/person';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
@@ -12,7 +11,7 @@ import { CommonConstants } from 'src/commons/constants';
 @Injectable()
 export class SystemRepository {
     private readonly logger = new Logger("systemCallRepository");
-    constructor(private readonly prismaService: PrismaService, private readonly httpService: HttpService,
+    constructor(private readonly httpService: HttpService,
         private configService: ConfigService) {}
         
         async getCitizenImg(person: PersonDTO) {

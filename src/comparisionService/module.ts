@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BiometricService } from './services/biometricService';
 import { PersonController } from './controller/controller';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { HttpModule } from '@nestjs/axios';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { ResponseModule, ResponseService } from 'src/response/src';
@@ -26,6 +25,6 @@ import NATSClientService from 'src/commons/NATSClientService';
     HttpModule, NestjsFormDataModule, ResponseModule
   ],
   controllers: [PersonController],
-  providers: [BiometricService, PrismaService, ResponseService, NATSClientService],
+  providers: [BiometricService, ResponseService, NATSClientService],
 })
 export class PersonModule {}

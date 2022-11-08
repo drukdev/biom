@@ -32,6 +32,7 @@ export class BiometricService
       {
         personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/akshay.jpeg`;
       } else
+      {
         if ([ '0192', '0193' ].includes(person.idNumber))
         {
           personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/Dhruv.png`
@@ -42,23 +43,32 @@ export class BiometricService
             return Buffer.from(value, "base64");;
           });
         }
+      }
       // Start comparing image buffers
       const compatibility = await this.biometricRepo.compareImage(image, personImg).then(value =>
       {
         this.logger.log(typeof value)
         return value;
       }) || '';
-      result = (compatibility > 75) ? true : false;
-      this.logger.debug(`result : ${ result }`);
-      returnResult.statusCode = CommonConstants.RESP_SUCCESS_200;
-      returnResult.message = 'success'
-      if (!result)
+      if (compatibility == undefined || compatibility == '')
       {
         this.logger.log(`result of comparision ${ result }`);
         returnResult.statusCode = CommonConstants.RESP_BAD_REQUEST;
         returnResult.error = 'Invalid Biometric'
+      } else
+      {
+        result = (compatibility > 75) ? true : false;
+        this.logger.debug(`result : ${ result }`);
+        returnResult.statusCode = CommonConstants.RESP_SUCCESS_200;
+        returnResult.message = 'success'
+        if (!result)
+        {
+          this.logger.log(`result of comparision ${ result }`);
+          returnResult.statusCode = CommonConstants.RESP_BAD_REQUEST;
+          returnResult.error = 'Invalid Biometric'
+        }
+        returnResult.data = { compatibility };
       }
-      returnResult.data = { compatibility };
     } catch (error)
     {
       returnResult.statusCode = CommonConstants.RESP_ERR_500;

@@ -26,14 +26,15 @@ export class BiometricRepository
                 }, 500);
             } else
             {
-                this.logger.log(`typeof image1 ${typeof image1} \n image2 : ${image2}`)
+                this.logger.log(`typeof image1 ${ typeof image1 } \n image2 : ${ image2 }`)
                 const img1Buffer: Buffer | undefined = await this.resizeUpdateImage(image1).then(value =>
                 {
                     return value
-                }).catch((error) => {
-                    this.logger.error(`error : ${error}`)
+                }).catch((error) =>
+                {
+                    this.logger.error(`error : ${ error }`)
                     return undefined;
-                  });
+                });
                 const img2Buffer: Buffer | undefined = await this.resizeUpdateImage(image2).then(value => { return value });
                 if (img1Buffer != undefined && img2Buffer != undefined)
                 {
@@ -41,7 +42,8 @@ export class BiometricRepository
                     {
                         return value;
                     });
-                } else {
+                } else
+                {
                     return undefined;
                 }
             }
@@ -58,7 +60,7 @@ export class BiometricRepository
         {
             return new Promise(async (resolve, reject) =>
             {
-                this.logger.log(`typeof image ${typeof image}`)
+                this.logger.log(`typeof image ${ typeof image }`)
                 try
                 {
                     jimp.read(image).then(img => 
@@ -66,8 +68,8 @@ export class BiometricRepository
                         try
                         {
                             img.resize(280, 280)
-                            .quality(100)
-                            .grayscale();
+                                .quality(100)
+                                .grayscale();
                         } catch (err)
                         {
                             this.logger.error("error in resizing", err);
@@ -85,11 +87,12 @@ export class BiometricRepository
                             }
                             resolve(buf)
                         });
-                    }).catch((error) => {
-                        this.logger.error(`error : ${error}`)
+                    }).catch((error) =>
+                    {
+                        this.logger.error(`error : ${ error }`)
                         reject("Could not read image.");
                         return undefined;
-                      });
+                    });
                 } catch (err)
                 {
                     this.logger.error(

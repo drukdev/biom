@@ -22,7 +22,7 @@ export class PersonController {
   async compareFace(@Body() newPerson: PersonDTO) {
     try {
       let result: ResponseService = new ResponseService();
-      this.logger.log(`comparing faces : ${JSON.stringify(newPerson)}`);
+      this.logger.log(`comparing faces `);
       
       if((typeof newPerson.fullName) == 'undefined' || (typeof newPerson.idNumber) == 'undefined') {
         this.logger.log("in if")

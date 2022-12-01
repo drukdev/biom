@@ -50,6 +50,7 @@ export class BiometricService
         this.logger.log(typeof value)
         return value;
       }) || '';
+      this.logger.debug(`compatibility from comparision : ${compatibility}`)
       if (compatibility == undefined || compatibility == '')
       {
         this.logger.log(`result of comparision ${ result }`);
@@ -58,7 +59,7 @@ export class BiometricService
       } else
       {
         result = (compatibility > 75) ? true : false;
-        this.logger.debug(`result : ${ result }`);
+        this.logger.debug(`result : ${ JSON.stringify(result) }`);
         returnResult.statusCode = CommonConstants.RESP_SUCCESS_200;
         returnResult.message = 'success'
         if (!result)
@@ -71,6 +72,8 @@ export class BiometricService
       }
     } catch (error)
     {
+      this.logger.error(`error in biometric : ${error}`)
+      this.logger.error(`error in biometric : ${error.message}`)
       returnResult.statusCode = CommonConstants.RESP_ERR_500;
       returnResult.error = CommonConstants.SERVER_ERROR;
     }

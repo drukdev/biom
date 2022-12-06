@@ -5,6 +5,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import logger from '../lib/logger';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +18,7 @@ async function bootstrap() {
     },
   });
   app.useGlobalPipes(new ValidationPipe());
+  app.use(bodyParser.json({limit: '5mb'}));
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Biometric Service')

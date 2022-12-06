@@ -67,9 +67,9 @@ export class BiometricRepository
                     {
                         try
                         {
-                            img.resize(280, 280)
-                                .quality(100)
-                                .grayscale();
+                            img.quality(100)
+                            .grayscale();
+                            // .resize(280, 280)
                         } catch (err)
                         {
                             this.logger.error("error in resizing", err);
@@ -132,8 +132,8 @@ export class BiometricRepository
 
             const compatibility: number = 100 - (difference * 100) / (width * height);
             this.logger.log(`${ difference } pixels differences`);
-            this.logger.log("Compatibility: ${", compatibility);
-            this.logger.log('< Completed comparing two images');
+            this.logger.log(`Compatibility: ${compatibility}`);
+            this.logger.log(`Completed comparing two images`);
             return compatibility;
 
         } catch (error)

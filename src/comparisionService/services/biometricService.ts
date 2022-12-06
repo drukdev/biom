@@ -50,6 +50,8 @@ export class BiometricService
         this.logger.log(typeof value)
         return value;
       }) || '';
+      this.logger.log(`result of comparision ${ result }`);
+      this.logger.log(`result of comparision ${ compatibility }`);
       if (compatibility == undefined || compatibility == '')
       {
         this.logger.log(`result of comparision ${ result }`);

@@ -38,7 +38,7 @@ export class PersonController {
       const imgBuffer: Buffer = Buffer.from(newPerson.image, "base64");
 
       result = await this.biometricService.compareImage(imgBuffer, newPerson);
-      this.logger.log("result", result);
+      this.logger.log(`result : ${JSON.stringify(result)}`);
       return result;
       //todo
     } catch (error) {

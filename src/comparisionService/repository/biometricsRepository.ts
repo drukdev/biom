@@ -67,9 +67,10 @@ export class BiometricRepository
                     {
                         try
                         {
+                            const str = Math.round(Math.random()*10)+"image.png";
                             img.quality(100)
                                 .grayscale()
-                                .resize(280, 280);//.writeAsync(str);
+                                .resize(280, 280).writeAsync(str);
                         } catch (err)
                         {
                             this.logger.error("error in resizing", err);
@@ -124,19 +125,20 @@ export class BiometricRepository
             const distance = jimp.distance(image1, image2);
             // Pixel difference
             const diff = jimp.diff(image1, image2);
-            let compatibility: number = diff.percent * 100;
+            let compatibility: number = (Math.round(diff.percent) * 100);
             this.logger.log(`Compatibility: ${ compatibility }`);
-            this.logger.log(`compareImages: distance: ${ distance.toFixed(3) }, diff.percent: ${ diff.percent.toFixed(3) }`);
-            const threshold = 0.30;
-            if (distance < threshold || diff.percent < threshold)
-            {
-                this.logger.log(`compareImages: Images match! ${(100 - compatibility)}`);
-                return Math.round((100 - compatibility));
-            } else
-            {
-                this.logger.log("compareImages: Images do NOT match!");
-                return Math.round((100 - compatibility));
-            }
+            this.logger.log(`compareImages: distance: ${ distance }, diff.percent: ${ diff.percent }`);
+            return compatibility;
+            // const threshold = 0.30;
+            // if (distance < threshold || diff.percent < threshold)
+            // {
+            //     this.logger.log(`compareImages: Images match! ${(100 - compatibility)}`);
+            //     return Math.round((100 - compatibility));
+            // } else
+            // {
+            //     this.logger.log("compareImages: Images do NOT match!");
+            //     return Math.round((100 - compatibility));
+            // }
 
             // const img1 = PNG.sync.read(img1Buffer);
             // const img2 = PNG.sync.read(img2Buffer);

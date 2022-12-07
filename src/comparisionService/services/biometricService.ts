@@ -31,6 +31,9 @@ export class BiometricService
       if ([ '0190', '0191' ].includes(person.idNumber))
       {
         personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/akshay.jpeg`;
+      }if ([ '0194', '0195' ].includes(person.idNumber))
+      {
+        personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/ekta.jpeg`;
       } else
       {
         if ([ '0192', '0193' ].includes(person.idNumber))
@@ -58,7 +61,7 @@ export class BiometricService
         returnResult.error = 'Invalid Biometric'
       } else
       {
-        result = (compatibility > 75) ? true : false;
+        result = (compatibility > 70) ? true : false;
         this.logger.debug(`result : ${ JSON.stringify(result) }`);
         returnResult.statusCode = CommonConstants.RESP_SUCCESS_200;
         returnResult.message = 'success'

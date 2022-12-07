@@ -31,19 +31,16 @@ export class PersonDTO {
   @IsNotEmpty()
   bloodType: BloodType;
   
-  @IsString()
   @ApiProperty({
     name: 'gewog' || 'gewogName',
     type: String
   })
   gewogName: string;
 
-  @IsString()
   @ApiProperty({
     name: 'dzongkhag' || 'dzongkhagName',
     type: String
   })
-  @IsNotEmpty()
   dzongkhagName: string;
 
   @ApiProperty({

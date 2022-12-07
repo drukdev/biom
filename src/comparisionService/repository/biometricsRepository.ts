@@ -127,7 +127,8 @@ export class BiometricRepository
             let compatibility: number = diff.percent * 100;
             this.logger.log(`Compatibility: ${ compatibility }`);
             this.logger.log(`compareImages: distance: ${ distance.toFixed(3) }, diff.percent: ${ diff.percent.toFixed(3) }`);
-            if (distance < 0.15 || diff.percent < 0.15)
+            const threshold = 0.30;
+            if (distance < threshold || diff.percent < threshold)
             {
                 this.logger.log(`compareImages: Images match! ${(100 - compatibility)}`);
                 return Math.round((100 - compatibility));

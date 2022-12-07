@@ -17,6 +17,7 @@ export class ExceptionHandler implements ExceptionFilter {
     exception = exception.response || exception;
     // In certain situations `httpAdapter` might not be available in the
     // constructor method, thus we should resolve it here.
+    console.log(`exception ${exception}`);
     const { httpAdapter } = this.httpAdapterHost;
 
     const ctx = host.switchToHttp();

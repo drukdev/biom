@@ -51,10 +51,9 @@ export class BiometricService
         return value;
       }) || '';
       this.logger.log(`result of comparision ${ result }`);
-      this.logger.log(`result of comparision ${ compatibility }`);
+      this.logger.log(`result of compatibility ${ compatibility }`);
       if (compatibility == undefined || compatibility == '')
       {
-        this.logger.log(`result of comparision ${ result }`);
         returnResult.statusCode = CommonConstants.RESP_BAD_REQUEST;
         returnResult.error = 'Invalid Biometric'
       } else
@@ -65,7 +64,6 @@ export class BiometricService
         returnResult.message = 'success'
         if (!result)
         {
-          this.logger.log(`result of comparision ${ result }`);
           returnResult.statusCode = CommonConstants.RESP_BAD_REQUEST;
           returnResult.error = 'Invalid Biometric'
         }

@@ -29,16 +29,13 @@ export class BiometricService
     {
       if ([ '0190', '0191' ].includes(person.idNumber))
       {
-        personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/akshay.jpeg`;
-        personImg =  this.getPersonImgBuffer(personImg)
+        personImg = this.getPersonImgBuffer(`${ process.env.PWD }/src/comparisionService/services/temporaryUpload/akshay.jpeg`);
       } else if ([ '0194', '0195' ].includes(person.idNumber))
       {
-        personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/ekta.jpeg`;
-        personImg =  this.getPersonImgBuffer(personImg)
+        personImg = this.getPersonImgBuffer(`${ process.env.PWD }/src/comparisionService/services/temporaryUpload/ekta.jpeg`);
       } else if ([ '0192', '0193' ].includes(person.idNumber))
       {
-        personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/Dhruv.png`
-        personImg =  this.getPersonImgBuffer(personImg)
+        personImg = this.getPersonImgBuffer(`${ process.env.PWD }/src/comparisionService/services/temporaryUpload/Dhruv.png`)
       } else
       {
         personImg = await this.systemRepository.getCitizenImg(person).then((value: string) =>
@@ -47,14 +44,12 @@ export class BiometricService
         });
       }
       // Start comparing image buffers
-      // await this.run(image, personImg);
       const compatibility: number = await this.biometricRepo.compareImage(image, personImg).then(value =>
       {
         this.logger.log(`result : ${ JSON.stringify(value) } ---- ${ (value.length) }`)
         if (value != undefined)
         {
-          if (value[ 2 ] != null)
-            return value[ 2 ]
+          return value[ 2 ]
         } else
         {
           undefined
@@ -62,7 +57,7 @@ export class BiometricService
       }) || undefined;
       this.logger.log(`result of comparision ${ result }`);
       this.logger.log(`result of compatibility ${ compatibility }`);
-      if (compatibility == undefined)
+      if (compatibility == undefined || compatibility == null)
       {
         returnResult.statusCode = CommonConstants.RESP_BAD_REQUEST;
         returnResult.error = 'Invalid Biometric'
@@ -90,9 +85,6 @@ export class BiometricService
 
   getPersonImgBuffer (path)
   {
-    fs.readFile(path, 'utf8', (err, data) => {
-      this.logger.log(`typeof data ${typeof data}`);
-      return data;
-   })
+    return fs.readFileSync(path).buffer
   }
 }

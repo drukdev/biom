@@ -6,6 +6,7 @@ import { HttpService } from '@nestjs/axios';
 import { ResponseService } from 'src/response/src';
 import { CommonConstants } from 'src/commons/constants';
 import { SystemRepository } from '../repository/systemRepository';
+import * as fs from 'fs';
 @Injectable()
 export class BiometricService
 {
@@ -29,17 +30,20 @@ export class BiometricService
       if ([ '0190', '0191' ].includes(person.idNumber))
       {
         personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/akshay.jpeg`;
+        personImg =  this.getPersonImgBuffer(personImg)
       } else if ([ '0194', '0195' ].includes(person.idNumber))
       {
         personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/ekta.jpeg`;
+        personImg =  this.getPersonImgBuffer(personImg)
       } else if ([ '0192', '0193' ].includes(person.idNumber))
       {
         personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/Dhruv.png`
+        personImg =  this.getPersonImgBuffer(personImg)
       } else
       {
         personImg = await this.systemRepository.getCitizenImg(person).then((value: string) =>
         {
-          return Buffer.from(value, "base64");;
+          return Buffer.from(value, "base64");
         });
       }
       // Start comparing image buffers
@@ -51,8 +55,6 @@ export class BiometricService
         {
           if (value[ 2 ] != null)
             return value[ 2 ]
-          else
-            return value[ 0 ]
         } else
         {
           undefined
@@ -84,5 +86,13 @@ export class BiometricService
       returnResult.error = CommonConstants.SERVER_ERROR;
     }
     return returnResult;
+  }
+
+  getPersonImgBuffer (path)
+  {
+    fs.readFile(path, 'utf8', (err, data) => {
+      this.logger.log(`typeof data ${typeof data}`);
+      return data;
+   })
   }
 }

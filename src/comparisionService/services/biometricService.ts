@@ -6,8 +6,6 @@ import { HttpService } from '@nestjs/axios';
 import { ResponseService } from 'src/response/src';
 import { CommonConstants } from 'src/commons/constants';
 import { SystemRepository } from '../repository/systemRepository';
-
-
 @Injectable()
 export class BiometricService
 {
@@ -17,7 +15,7 @@ export class BiometricService
   constructor(private readonly httpService: HttpService,
     private configService: ConfigService)
   {
-    this.biometricRepo = new BiometricRepository(this.httpService, this.configService);
+    this.biometricRepo = new BiometricRepository(this.configService);
     this.systemRepository = new SystemRepository(this.httpService, this.configService);
   }
   public async compareImage (image: Buffer, person: PersonDTO)
@@ -31,7 +29,7 @@ export class BiometricService
       if ([ '0190', '0191' ].includes(person.idNumber))
       {
         personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/akshay.jpeg`;
-      }if ([ '0194', '0195' ].includes(person.idNumber))
+      } if ([ '0194', '0195' ].includes(person.idNumber))
       {
         personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/ekta.jpeg`;
       } else
@@ -48,20 +46,26 @@ export class BiometricService
         }
       }
       // Start comparing image buffers
-      const compatibility = await this.biometricRepo.compareImage(image, personImg).then(value =>
+      // await this.run(image, personImg);
+      const compatibility: number = await this.biometricRepo.compareImage(image, personImg).then(value =>
       {
-        this.logger.log(typeof value)
-        return value;
-      }) || '';
+        if (value != undefined)
+        {
+          return value[ 0 ];
+        } else
+        {
+          undefined
+        }
+      }) || undefined;
       this.logger.log(`result of comparision ${ result }`);
       this.logger.log(`result of compatibility ${ compatibility }`);
-      if (compatibility == undefined || compatibility == '')
+      if (compatibility == undefined)
       {
         returnResult.statusCode = CommonConstants.RESP_BAD_REQUEST;
         returnResult.error = 'Invalid Biometric'
       } else
       {
-        result = (compatibility > 70) ? true : false;
+        result = (compatibility > this.configService.get('THRESHOLD')) ? true : false;
         this.logger.debug(`result : ${ JSON.stringify(result) }`);
         returnResult.statusCode = CommonConstants.RESP_SUCCESS_200;
         returnResult.message = 'success'
@@ -74,8 +78,7 @@ export class BiometricService
       }
     } catch (error)
     {
-      this.logger.error(`error in biometric : ${error}`)
-      this.logger.error(`error in biometric : ${error.message}`)
+      this.logger.error(`error in biometric : ${ error }`)
       returnResult.statusCode = CommonConstants.RESP_ERR_500;
       returnResult.error = CommonConstants.SERVER_ERROR;
     }

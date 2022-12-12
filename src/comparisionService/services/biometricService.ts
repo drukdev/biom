@@ -33,22 +33,26 @@ export class BiometricService
       {
         personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/ekta.jpeg`;
       } else if ([ '0192', '0193' ].includes(person.idNumber))
+      {
+        personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/Dhruv.png`
+      } else
+      {
+        personImg = await this.systemRepository.getCitizenImg(person).then((value: string) =>
         {
-          personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/Dhruv.png`
-        } else
-        {
-          personImg = await this.systemRepository.getCitizenImg(person).then((value: string) =>
-          {
-            return Buffer.from(value, "base64");;
-          });
-        }
+          return Buffer.from(value, "base64");;
+        });
+      }
       // Start comparing image buffers
       // await this.run(image, personImg);
       const compatibility: number = await this.biometricRepo.compareImage(image, personImg).then(value =>
       {
+        this.logger.log(`result : ${ JSON.stringify(value) } ---- ${ (value.length) }`)
         if (value != undefined)
         {
-          return value[ 0 ];
+          if (value[ 2 ] != null)
+            return value[ 2 ]
+          else
+            return value[ 0 ]
         } else
         {
           undefined

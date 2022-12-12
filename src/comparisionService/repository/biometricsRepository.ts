@@ -17,7 +17,7 @@ export class BiometricRepository
         const matchingResponse = await sdk.matchingApi.match({
             images: [
                 { type: ImageSource.LIVE, data: face1 },
-                // {type: ImageSource.DOCUMENT_RFID, data: face1},
+                {type: ImageSource.DOCUMENT_RFID, data: face1},
                 { data: face2 },
             ],
             thumbnails: true

@@ -29,12 +29,10 @@ export class BiometricService
       if ([ '0190', '0191' ].includes(person.idNumber))
       {
         personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/akshay.jpeg`;
-      } if ([ '0194', '0195' ].includes(person.idNumber))
+      } else if ([ '0194', '0195' ].includes(person.idNumber))
       {
         personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/ekta.jpeg`;
-      } else
-      {
-        if ([ '0192', '0193' ].includes(person.idNumber))
+      } else if ([ '0192', '0193' ].includes(person.idNumber))
         {
           personImg = `${ process.env.PWD }/src/comparisionService/services/temporaryUpload/Dhruv.png`
         } else
@@ -44,7 +42,6 @@ export class BiometricService
             return Buffer.from(value, "base64");;
           });
         }
-      }
       // Start comparing image buffers
       // await this.run(image, personImg);
       const compatibility: number = await this.biometricRepo.compareImage(image, personImg).then(value =>

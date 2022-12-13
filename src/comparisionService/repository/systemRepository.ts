@@ -107,7 +107,7 @@ export class SystemRepository
       return response;
     } catch (error)
     {
-      this.logger.error(`ERROR in PATCH : ${ JSON.stringify(error) }`);
+      this.logger.error(`ERROR in POST : ${ JSON.stringify(error) }`);
       if (
         error
           .toString()

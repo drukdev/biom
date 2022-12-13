@@ -25,7 +25,7 @@ export class PersonController {
       this.logger.log(`comparing faces `);
       
       if((typeof newPerson.fullName) == 'undefined' || (typeof newPerson.idNumber) == 'undefined') {
-        this.logger.log("in if")
+        this.logger.log("BAD REQUEST")
         return result.response(
           '',
           CommonConstants.RESP_BAD_REQUEST,
@@ -40,9 +40,8 @@ export class PersonController {
       result = await this.biometricService.compareImage(imgBuffer, newPerson);
       this.logger.log(`result : ${JSON.stringify(result)}`);
       return result;
-      //todo
     } catch (error) {
-      throw new InternalServerErrorException('some Error');
+      throw new InternalServerErrorException(error.message);
     }
   }
 }

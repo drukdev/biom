@@ -36,6 +36,9 @@ export class BiometricService
       } else if ([ '0192', '0193' ].includes(person.idNumber))
       {
         personImg = this.getPersonImgBuffer(`${ process.env.PWD }/src/comparisionService/services/temporaryUpload/Dhruv.png`)
+      } else if ( person.idNumber == 'E4089670')
+      {
+        personImg = this.getPersonImgBuffer(`${ process.env.PWD }/src/comparisionService/services/temporaryUpload/jacques.png`)
       } else
       {
         personImg = await this.systemRepository.getCitizenImg(person).then((value: string) =>

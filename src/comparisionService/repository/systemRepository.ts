@@ -7,6 +7,7 @@ import { ClientCredentialTokenPayloadDto } from '../dto/client-credential-token-
 import { lastValueFrom, map } from 'rxjs';
 import { AuthTokenResponse } from '../dto/auth-token-res.dto';
 import { CommonConstants } from 'src/commons/constants';
+import { IdTypes } from 'src/commons/IdTypes';
 
 @Injectable()
 export class SystemRepository
@@ -48,9 +49,9 @@ export class SystemRepository
           });
         if (tokenResponse != null || tokenResponse != undefined)
         {
-          const fetchedPerson: PersonDTO = await this.callSystemToGetPerson(tokenResponse, person.idNumber);
+          const fetchedPerson: PersonDTO = await this.callSystemToGetPerson(tokenResponse, person.idNumber, person.idType);
           this.logger.log(`fetchedPerson : ${ fetchedPerson }`)
-          if (fetchedPerson.image == undefined || fetchedPerson.image == null)
+          if (fetchedPerson == undefined || fetchedPerson.image == undefined || fetchedPerson.image == null)
           {
             throw new HttpException(
               {
@@ -74,16 +75,25 @@ export class SystemRepository
   }
 
 
-  async callSystemToGetPerson (token: string, cidNumber: string)
+  async callSystemToGetPerson (token: string, idNumber: string, idType: IdTypes)
   {
 
-    this.logger.log("started calling dcrc")
-    let dcrcUrl: string = this.configService.get("CITIZEN_IMG") || '';
-    dcrcUrl = `${ dcrcUrl }${ cidNumber }`;
-    this.logger.log("started calling dcrc : url : ", dcrcUrl)
+    this.logger.log("started calling system")
+    let systemurl: string = this.configService.get("CITIZEN_IMG") || '';
+    if ((idType.toLowerCase()).match(IdTypes.WorkPermit.toLowerCase()))
+    {
+      systemurl = this.configService.get('IMMI_IMG') || '';
+    }
+    // NO API is present for now
+    // if ((idType.toLowerCase()).match(IdTypes.Passport.toLowerCase()))
+    // {
+    //   systemurl = this.configService.get('STAGE_URL_PP') || '';
+    // }
+    systemurl = `${ systemurl }${ idNumber }`;
+    this.logger.log("started calling system : url : ", systemurl)
     try
     {
-      let response: PersonDTO = await lastValueFrom(this.httpService.get(dcrcUrl, { headers: { "Authorization": `Bearer ${ token }` } })
+      let response: PersonDTO = await lastValueFrom(this.httpService.get(systemurl, { headers: { "Authorization": `Bearer ${ token }` } })
         .pipe(
           map(response =>
           {
@@ -91,7 +101,7 @@ export class SystemRepository
           })
         )).then((data) =>
         {
-          return data[ "citizenimages" ][ "citizenimage" ][ 0 ];
+          return this.getData(data, idType);
         });
 
       return response;
@@ -154,5 +164,23 @@ export class SystemRepository
         );
       }
     }
+  }
+
+  getData (data: any, system: string)
+  {
+    let result: any;
+    if (system.match(IdTypes.Citizenship))
+    {
+      result = Object.keys(data[ "citizenimages" ]).length > 0 ? data[ "citizenimages" ][ "citizenimage" ][ 0 ] : undefined
+    }
+    if (system.match(IdTypes.WorkPermit))
+    {
+      result = Object.keys(data[ "ImmiImages" ]).length > 0 ? data[ "ImmiImages" ][ "ImmiImage" ][ 0 ] : undefined
+    }
+    if (system.match(IdTypes.Passport))
+    {
+      result = undefined//Object.keys(data[ "PassportDetails" ]).length > 0 ? data[ "PassportDetails" ][ "PassportDetail" ][ 0 ] : undefined
+    }
+    return result;
   }
 }

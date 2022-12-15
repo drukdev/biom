@@ -13,6 +13,7 @@
     "dbSchema": "npx prisma db push --schema=./src/prisma/schema.prisma",
     "prismaStudio": "npx prisma studio",
     "start": "nest start",
+    "start:pm2": "NODE_ENV=development pm2 start dist/src/main.js --name biometric-service --update-env",
     "start:dev": "NODE_ENV=development nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "NODE_ENV=production node dist/main",

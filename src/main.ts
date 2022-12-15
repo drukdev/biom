@@ -1,11 +1,12 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { Transport, MicroserviceOptions } from '@nestjs/microservices';
-import logger from '../lib/logger';
-import * as bodyParser from 'body-parser';
+import { HttpAdapterHost, NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+import { ConfigService } from "@nestjs/config";
+import { ValidationPipe, VersioningType } from "@nestjs/common";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { Transport, MicroserviceOptions } from "@nestjs/microservices";
+import logger from "../lib/logger";
+import * as bodyParser from "body-parser";
+import AllExceptionsFilter from "./commons/exceptionsFilter";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,23 +15,26 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.NATS,
     options: {
-      url: configService.get('NATS_CLIENT')?.url
+      url: configService.get("NATS_CLIENT")?.url,
     },
   });
   app.useGlobalPipes(new ValidationPipe());
-  app.use(bodyParser.json({limit: '5mb'}));
+  app.use(bodyParser.json({ limit: "5mb" }));
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Biometric Service')
-    .setDescription('NDI Biometric Service Module')
-    .setVersion('1.0')
+    .setTitle("Biometric Service")
+    .setDescription("NDI Biometric Service Module")
+    .setVersion("1.0")
     .build();
 
+  const httpAdapter = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
+
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('/swagger', app, document);
+  SwaggerModule.setup("/swagger", app, document);
   await app.startAllMicroservices();
-  await app.listen(configService.get('PORT') || 3000, () => {
-    logger.info(`Listening on Port:`+configService.get('PORT') || 3000 );
+  await app.listen(configService.get("PORT") || 3000, () => {
+    logger.info(`Listening on Port:` + configService.get("PORT") || 3000);
   });
 }
 bootstrap();

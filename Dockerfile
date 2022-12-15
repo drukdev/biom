@@ -1,6 +1,5 @@
 # Base Image
 FROM node:lts-alpine AS base
-LABEL maintainer "Nilesh Bamne<nilesh.bamne@ayanworks.com>"
 
 # couchbase sdk requirements
 RUN apk add --no-cache yarn curl bash g++ make && rm -rf /var/cache/apk/*

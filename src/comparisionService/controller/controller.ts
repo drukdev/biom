@@ -22,10 +22,10 @@ export class PersonController {
   async compareFace(@Body() newPerson: PersonDTO) {
     try {
       let result: ResponseService = new ResponseService();
-      this.logger.log(`comparing faces : ${JSON.stringify(newPerson)}`);
+      this.logger.log(`comparing faces `);
       
       if((typeof newPerson.fullName) == 'undefined' || (typeof newPerson.idNumber) == 'undefined') {
-        this.logger.log("in if")
+        this.logger.log("BAD REQUEST")
         return result.response(
           '',
           CommonConstants.RESP_BAD_REQUEST,
@@ -38,11 +38,10 @@ export class PersonController {
       const imgBuffer: Buffer = Buffer.from(newPerson.image, "base64");
 
       result = await this.biometricService.compareImage(imgBuffer, newPerson);
-      this.logger.log("result", result);
+      this.logger.log(`result : ${JSON.stringify(result)}`);
       return result;
-      //todo
     } catch (error) {
-      throw new InternalServerErrorException('some Error');
+      throw new InternalServerErrorException(error.message);
     }
   }
 }

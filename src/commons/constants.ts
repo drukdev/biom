@@ -11,7 +11,7 @@ export enum CommonConstants {
   DATA_ALREADY_PRESENT = 'RECORD ALREADY EXIST',
   RESP_CONFLICT = 409,
   RESP_FAILURE_NOT_MATCHED = 'Data does not match',
-  SERVER_ERROR = 'Data does not match',
+  SERVER_ERROR = 'Error from biometric comparision',
 
   // SUCCESS MESSAGE
   RESP_SUCCESS_200 = 200, // equivalent to 200 (success) returned from HTTP call

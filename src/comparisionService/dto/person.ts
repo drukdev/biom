@@ -15,20 +15,15 @@ export class PersonDTO {
   @IsNotEmpty()
   fullName: string;
 
-  @IsString()
   @ApiProperty({
     name: 'gender',
     type: String
   })
-  @IsNotEmpty()
   gender: string;
 
-  @IsEnum(BloodType)
   @ApiProperty({
-    name: 'bloodType',
-    enum : BloodType
+    name: 'bloodType'
   })
-  @IsNotEmpty()
   bloodType: BloodType;
   
   @ApiProperty({
@@ -74,7 +69,6 @@ export class PersonDTO {
     name: 'isBhutanese',
     type: Boolean
   })
-  @IsNotEmpty()
   isBhutanese: boolean
 
   @ApiProperty({

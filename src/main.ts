@@ -14,23 +14,26 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.NATS,
     options: {
-      url: configService.get('NATS_CLIENT')?.url
+      url: configService.get("NATS_CLIENT")?.url,
     },
   });
   app.useGlobalPipes(new ValidationPipe());
-  app.use(bodyParser.json({limit: '5mb'}));
+  app.use(bodyParser.json({ limit: "5mb" }));
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Biometric Service')
-    .setDescription('NDI Biometric Service Module')
-    .setVersion('1.0')
+    .setTitle("Biometric Service")
+    .setDescription("NDI Biometric Service Module")
+    .setVersion("1.0")
     .build();
 
+  const httpAdapter = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
+
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('/swagger', app, document);
+  SwaggerModule.setup("/swagger", app, document);
   await app.startAllMicroservices();
-  await app.listen(configService.get('PORT') || 3000, () => {
-    logger.info(`Listening on Port:`+configService.get('PORT') || 3000 );
+  await app.listen(configService.get("PORT") || 3000, () => {
+    logger.info(`Listening on Port:` + configService.get("PORT") || 3000);
   });
 }
 bootstrap();

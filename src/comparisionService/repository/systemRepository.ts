@@ -78,17 +78,17 @@ export class SystemRepository
   async callSystemToGetPerson (token: string, idNumber: string, idType: IdTypes)
   {
 
-    this.logger.log("started calling system")
+    this.logger.log(`started calling system for idType : ${idType}`)
     let systemurl: string = this.configService.get("CITIZEN_IMG") || '';
     if ((idType.toLowerCase()).match(IdTypes.WorkPermit.toLowerCase()))
     {
       systemurl = this.configService.get('IMMI_IMG') || '';
     }
-    // NO API is present for now
-    // if ((idType.toLowerCase()).match(IdTypes.Passport.toLowerCase()))
-    // {
-    //   systemurl = this.configService.get('STAGE_URL_PP') || '';
-    // }
+    // Get Image from Passport number
+    if ((idType.toLowerCase()).match(IdTypes.Passport.toLowerCase()))
+    {
+      systemurl = this.configService.get('IMM_IMG_PP') || '';
+    }
     systemurl = `${ systemurl }${ idNumber }`;
     this.logger.log("started calling system : url : ", systemurl)
     try
@@ -179,7 +179,7 @@ export class SystemRepository
     }
     if (system.match(IdTypes.Passport))
     {
-      result = undefined//Object.keys(data[ "PassportDetails" ]).length > 0 ? data[ "PassportDetails" ][ "PassportDetail" ][ 0 ] : undefined
+      result = Object.keys(data[ "ImmisImages" ]).length > 0 ? data[ "ImmisImages" ][ "ImmisImage" ][ 0 ] : undefined
     }
     return result;
   }

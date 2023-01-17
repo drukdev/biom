@@ -78,19 +78,20 @@ export class SystemRepository
   async callSystemToGetPerson (token: string, idNumber: string, idType: IdTypes)
   {
 
-    this.logger.log(`started calling system for idType : ${idType}`)
+    this.logger.log(`started calling system for idType : ${ idType }`)
     let systemurl: string = this.configService.get("CITIZEN_IMG") || '';
+    // Get Image by Work Permit
     if ((idType.toLowerCase()).match(IdTypes.WorkPermit.toLowerCase()))
     {
       systemurl = this.configService.get('IMMI_IMG') || '';
     }
-    // Get Image from Passport number
+    // Get Image by Passport number
     if ((idType.toLowerCase()).match(IdTypes.Passport.toLowerCase()))
     {
       systemurl = this.configService.get('IMM_IMG_PP') || '';
     }
     systemurl = `${ systemurl }${ idNumber }`;
-    this.logger.log("started calling system : url : ", systemurl)
+    this.logger.log(`started calling system : url : ${ systemurl }`)
     try
     {
       let response: PersonDTO = await lastValueFrom(this.httpService.get(systemurl, { headers: { "Authorization": `Bearer ${ token }` } })

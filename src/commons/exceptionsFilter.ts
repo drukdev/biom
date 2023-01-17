@@ -10,7 +10,7 @@ import { HttpAdapterHost } from '@nestjs/core';
 import { Request } from 'express';
 import { PrismaClient } from '@prisma/client';
 
-const { PrismaClientUnknownRequestError , PrismaClientValidationError } = PrismaClient;
+const { PrismaClientKnownRequestError , PrismaClientValidationError } = PrismaClient;
 
 @Catch()
 export default class AllExceptionsFilter implements ExceptionFilter {
@@ -29,7 +29,7 @@ export default class AllExceptionsFilter implements ExceptionFilter {
         httpStatus = (exception as HttpException).getStatus();
         message = exception?.message || 'Internal server error';
         break;
-      case PrismaClientUnknownRequestError:
+      case PrismaClientKnownRequestError:
         switch (exception.code) {
           case 'P2002': // Unique constraint failed on the {constraint}
           case 'P2000': // The provided value for the column is too long for the column's type. Column: {column_name}

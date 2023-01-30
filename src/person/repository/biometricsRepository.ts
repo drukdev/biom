@@ -26,7 +26,7 @@ export class BiometricRepository
         this.logger.log("-----------------------------------------------------------------")
         this.logger.log("                         Compare Results                         ")
         this.logger.log("-----------------------------------------------------------------")
-        this.logger.log(`result : ${ JSON.stringify(matchingResponse.results) }`)
+        this.logger.log(`result from third party service : ${ JSON.stringify(matchingResponse.results) }`)
         return matchingResponse.results.map((res: { similarity: number }) => res.similarity);
     }
 }

@@ -6,7 +6,7 @@ import {
   Post} from '@nestjs/common';
 import { BiometricService } from '../services/biometricService';
 import { ResponseService } from 'src/response/src';
-import { CommonConstants } from 'src/commons/constants';
+import { CommonConstants, ServiceConstants } from 'src/commons/constants';
 import { MessagePattern } from '@nestjs/microservices';
 import { PersonDTO } from '../dto/person';
 
@@ -17,12 +17,12 @@ export class PersonController {
 
   @Post('validate')
   @MessagePattern({
-    endpoint: 'biometricService/compareBiometrics'
+    endpoint: `${ServiceConstants.NATS_ENDPOINT}/${ServiceConstants.COMPARE_BM}`
   })
-  async compareFace(@Body() newPerson: PersonDTO) {
+  async compareBiometric(@Body() newPerson: PersonDTO) {
     try {
       let result: ResponseService = new ResponseService();
-      this.logger.log(`comparing faces `);
+      this.logger.log(`compareBiometric starts`);
       
       if((typeof newPerson.fullName) == 'undefined' || (typeof newPerson.idNumber) == 'undefined') {
         this.logger.log("BAD REQUEST")
@@ -36,7 +36,6 @@ export class PersonController {
 
       // Base64 string to image
       const imgBuffer: Buffer = Buffer.from(newPerson.image, "base64");
-
       result = await this.biometricService.compareImage(imgBuffer, newPerson);
       this.logger.log(`result : ${JSON.stringify(result)}`);
       return result;

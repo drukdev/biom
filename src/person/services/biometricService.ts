@@ -23,33 +23,36 @@ export class BiometricService
   {
     this.logger.log("Start to compare images")
     let personImg: any;
-    let result: boolean = false;
     let returnResult: ResponseService = new ResponseService();
     try
     {
-      if ([ '0190', '0191' ].includes(person.idNumber))
+      const PATH_TO_TEMP = `/src/person/services/temporaryUpload/`;
+      switch (person.idNumber)
       {
-        personImg = this.getPersonImgBuffer(`${ process.env.PWD }/src/comparisionService/services/temporaryUpload/akshay.jpeg`);
-      } else if ([ '0194', '0195' ].includes(person.idNumber))
-      {
-        personImg = this.getPersonImgBuffer(`${ process.env.PWD }/src/comparisionService/services/temporaryUpload/ekta.jpeg`);
-      } else if ([ '0192', '0193' ].includes(person.idNumber))
-      {
-        personImg = this.getPersonImgBuffer(`${ process.env.PWD }/src/comparisionService/services/temporaryUpload/Dhruv.png`)
-      } else if ( person.idNumber == 'E4089670')
-      {
-        personImg = this.getPersonImgBuffer(`${ process.env.PWD }/src/comparisionService/services/temporaryUpload/jacques.png`)
-      } else
-      {
-        personImg = await this.systemRepository.getCitizenImg(person).then((value: string) =>
-        {
-          return Buffer.from(value, "base64");
-        });
+        case '0190':
+        case '0191':
+          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${PATH_TO_TEMP}akshay.jpeg`);
+          break;
+        case '0194':
+        case '0195':
+          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${PATH_TO_TEMP}ekta.jpeg`);
+          break;
+        case '0192':
+        case '0193':
+          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${PATH_TO_TEMP}dhruv.jpeg`);
+          break;
+        case 'E4089670':
+          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${PATH_TO_TEMP}jacques.png`)
+          break;
+        default:
+          personImg = await this.systemRepository.getCitizenImg(person).then((value: string) =>
+          {
+            return Buffer.from(value, "base64");
+          });
       }
       // Start comparing image buffers
       const compatibility: number = await this.biometricRepo.compareImage(image, personImg).then(value =>
       {
-        this.logger.log(`result : ${ JSON.stringify(value) } ---- ${ (value.length) }`)
         if (value != undefined)
         {
           return value[ 2 ]
@@ -58,16 +61,15 @@ export class BiometricService
           undefined
         }
       }) || undefined;
-      this.logger.log(`result of comparision ${ result }`);
-      this.logger.log(`result of compatibility ${ compatibility }`);
+
       if (compatibility == undefined || compatibility == null)
       {
         returnResult.statusCode = CommonConstants.RESP_BAD_REQUEST;
         returnResult.error = 'Invalid Biometric'
       } else
       {
-        result = (compatibility > this.configService.get('THRESHOLD')) ? true : false;
-        this.logger.debug(`result : ${ JSON.stringify(result) }`);
+        let result: boolean = (compatibility > this.configService.get('THRESHOLD')) ? true : false;
+        this.logger.debug(`result of comparision : ${ JSON.stringify(result) }`);
         returnResult.statusCode = CommonConstants.RESP_SUCCESS_200;
         returnResult.message = 'success'
         if (!result)
@@ -86,7 +88,7 @@ export class BiometricService
     return returnResult;
   }
 
-  getPersonImgBuffer (path)
+  getPersonImgBuffer (path: string | Buffer | URL)
   {
     return fs.readFileSync(path).buffer
   }

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { PersonDTO } from 'src/comparisionService/dto/person';
+import { PersonDTO } from 'src/person/dto/person';
 import { lastValueFrom } from 'rxjs';
 import { CommonConstants } from './constants';
 

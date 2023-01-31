@@ -39,7 +39,7 @@ export class BiometricService
           break;
         case '0192':
         case '0193':
-          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${PATH_TO_TEMP}dhruv.jpeg`);
+          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${PATH_TO_TEMP}dhruv.png`);
           break;
         case 'E4089670':
           personImg = this.getPersonImgBuffer(`${ process.env.PWD }${PATH_TO_TEMP}jacques.png`)

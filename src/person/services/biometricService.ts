@@ -31,18 +31,30 @@ export class BiometricService
       {
         case '0190':
         case '0191':
-          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${PATH_TO_TEMP}akshay.jpeg`);
+          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${ PATH_TO_TEMP }akshay.jpeg`);
           break;
         case '0194':
         case '0195':
-          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${PATH_TO_TEMP}ekta.jpeg`);
+          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${ PATH_TO_TEMP }ekta.jpeg`);
           break;
         case '0192':
         case '0193':
-          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${PATH_TO_TEMP}dhruv.png`);
+          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${ PATH_TO_TEMP }dhruv.png`);
           break;
         case 'E4089670':
-          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${PATH_TO_TEMP}jacques.png`)
+          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${ PATH_TO_TEMP }jacques.png`)
+          break;
+        case '0197':
+        case '0198':
+          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${ PATH_TO_TEMP }Sai.jpeg`);
+          break;
+        case '0199':
+        case '0202':
+          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${ PATH_TO_TEMP }ankita.jpg`);
+          break;
+        case '0203':
+        case '0204':
+          personImg = this.getPersonImgBuffer(`${ process.env.PWD }${ PATH_TO_TEMP }anusha.jpeg`);
           break;
         default:
           personImg = await this.systemRepository.getCitizenImg(person).then((value: string) =>

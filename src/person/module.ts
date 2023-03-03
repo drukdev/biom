@@ -10,13 +10,13 @@ import NATSClientService from 'src/commons/NATSClientService';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({envFilePath: `${process.cwd()}/.env`}),
+    ConfigModule.forRoot({envFilePath: `${process.cwd()}/config/env/${process.env.NODE_ENV}.env`}),
     ClientsModule.register([
       {
         name: 'NATS_CLIENT',
         transport: Transport.NATS,
         options: {
-          servers: [`${process.env.NATS_URL}`]
+          servers: [`${process.env.NATS_URL}` as string]
           // deserializer: new InboundMessageIdentityDeserializer(),
           // serializer: new OutboundResponseIdentitySerializer(),
         },

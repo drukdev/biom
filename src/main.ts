@@ -15,7 +15,7 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.NATS,
     options: {
-      url: configService.get("NATS_CLIENT")?.url,
+      servers: configService.get("NATS_CLIENT")?.url,
     },
   });
   app.useGlobalPipes(new ValidationPipe());

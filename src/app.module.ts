@@ -14,7 +14,7 @@ import { PersonModule } from './person/module';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [config],
-      envFilePath: `${process.cwd()}/config/env/${process.env.NODE_ENV}.env`,
+      envFilePath: `${process.cwd()}/.env`,
       validationSchema: validationSchema,
     }),
     PersonModule,

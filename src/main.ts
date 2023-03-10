@@ -37,7 +37,7 @@ async function bootstrap() {
   SwaggerModule.setup("/swagger", app, document);
   await app.startAllMicroservices();
   await app.listen(configService.get("PORT") || 3000, () => {
-    logger.info(`Listening on Port:` + configService.get("PORT") || 3000);
+    logger.log(`Listening on Port:` + configService.get("PORT") || 3000);
   });
 }
 bootstrap();

@@ -1,15 +1,18 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
-import logger from '../lib/logger';
+import { MyLogger } from 'lib/logger';
 import * as bodyParser from 'body-parser';
 import AllExceptionsFilter from './commons/exceptionsFilter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Main Logger');
+  const app = await NestFactory.create(AppModule, {
+    logger: new MyLogger(),
+  });
   const configService = app.get(ConfigService);
 
   app.connectMicroservice<MicroserviceOptions>({
@@ -34,7 +37,7 @@ async function bootstrap() {
   SwaggerModule.setup("/swagger", app, document);
   await app.startAllMicroservices();
   await app.listen(configService.get("PORT") || 3000, () => {
-    logger.info(`Listening on Port:` + configService.get("PORT") || 3000);
+    logger.log(`Listening on Port:` + configService.get("PORT") || 3000);
   });
 }
 bootstrap();

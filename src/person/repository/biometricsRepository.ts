@@ -12,7 +12,8 @@ export class BiometricRepository
     constructor(private configService: ConfigService) { }
     async compareImage (face1: Buffer, face2: Buffer)
     {
-        let apiBasePath = this.configService.get('BM_SDK_BASE_PATH') || "https://faceapi.regulaforensics.com"
+        let apiBasePath = this.configService.get('BM_SDK_BASE_PATH')
+        this.logger.debug(`server endpoint ${apiBasePath}`);
         const sdk = new FaceSdk({ basePath: apiBasePath })
         const matchingResponse = await sdk.matchingApi.match({
             images: [

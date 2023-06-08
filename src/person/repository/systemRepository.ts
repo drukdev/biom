@@ -3,163 +3,130 @@ import * as qs from 'qs';
 import { PersonDTO } from '../dto/person';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { ClientCredentialTokenPayloadDto } from '../dto/client-credential-token-payload.dto';
 import { lastValueFrom, map } from 'rxjs';
 import { AuthTokenResponse } from '../dto/auth-token-res.dto';
-import { CommonConstants } from 'src/commons/constants';
-import { IdTypes } from 'src/commons/IdTypes';
+import { CommonConstants } from 'src/common/constants';
+import { IdTypes } from 'src/common/IdTypes';
+import { AuthTokenRequest } from '../dto/auth-token-req.dto';
+import { plainToInstance } from 'class-transformer';
+import { Person } from '@regulaforensics/facesdk-webclient';
 
 @Injectable()
-export class SystemRepository
-{
-  private readonly logger = new Logger("systemCallRepository");
-  constructor(private readonly httpService: HttpService,
-    private configService: ConfigService) { }
+export class SystemRepository {
+  private readonly logger = new Logger(SystemRepository.name);
+  constructor(private readonly httpService: HttpService, private configService: ConfigService) {}
 
-  async getCitizenImg (person: PersonDTO)
-  {
-    this.logger.log(`start to get Citizen Image`)
-    try
-    {
-      if (person.idNumber != null)
-      {
+  async getCitizenImg(person: PersonDTO): Promise<string | undefined> {
+    this.logger.log(`start to get Citizen Image`);
+    try {
+      if (null != person.idNumber) {
         // Get access token
-        const sso_url: string = this.configService.get('STAGE_DIIT_SSO') || '';
-        const payload = new ClientCredentialTokenPayloadDto();
+        const ssoUrl: string = this.configService.get('STAGE_DIIT_SSO') || '';
+        const payload = new AuthTokenRequest();
+        // eslint-disable-next-line camelcase
         payload.client_id = this.configService.get('CLIENT_ID') || '';
+        // eslint-disable-next-line camelcase
         payload.client_secret = this.configService.get('CLIENT_SECRET') || '';
+        // eslint-disable-next-line camelcase
         payload.grant_type = this.configService.get('GRANT_TYPE');
-
         const config = {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
-        }
-        this.logger.error(`sso_url : ${ sso_url }`);
-        let tokenResponse: string;
-        tokenResponse = await lastValueFrom(this.httpService.post(sso_url, qs.stringify(payload), config)
-          .pipe(
-            map(response =>
-            {
-              return response.data
-            })
-          )).then((data: AuthTokenResponse) =>
-          {
-            return data.access_token;
-          });
-        if (tokenResponse != null || tokenResponse != undefined)
-        {
-          const fetchedPerson: PersonDTO = await this.callSystemToGetPerson(tokenResponse, person.idNumber, person.idType);
-          this.logger.log(`fetchedPerson : ${ fetchedPerson }`)
-          if (fetchedPerson == undefined || fetchedPerson.image == undefined || fetchedPerson.image == null)
-          {
+        };
+        this.logger.error(`sso_url : ${ssoUrl}`);
+        const tokenResponse: AuthTokenResponse = await lastValueFrom(
+          this.httpService.post(ssoUrl, qs.stringify(payload), config).pipe(map((response) => response.data))
+        ).then((data: AuthTokenResponse) => plainToInstance(AuthTokenResponse, data));
+
+        if (null != tokenResponse || tokenResponse != undefined) {
+          const fetchedPerson: PersonDTO = await this.callSystemToGetPerson(
+            tokenResponse.accessToken,
+            person.idNumber,
+            person.idType
+          );
+          this.logger.log(`fetchedPerson : ${fetchedPerson}`);
+          if (fetchedPerson == undefined || fetchedPerson.image == undefined || null == fetchedPerson.image) {
             throw new HttpException(
               {
                 statusCode: HttpStatus.NOT_FOUND,
-                error: 'Citizen data not found. Please update your record',
+                error: 'Citizen data not found. Please update your record'
               },
               HttpStatus.NOT_FOUND
             );
-          } else
-          {
-            this.logger.log(`citizen image : ${ fetchedPerson.image.length }`)
+          } else {
+            this.logger.log(`citizen image : ${fetchedPerson.image.length}`);
             return fetchedPerson.image;
           }
         }
       }
-    }
-    catch (err)
-    {
+    } catch (err) {
       this.logger.error(err);
     }
   }
 
-
-  async callSystemToGetPerson (token: string, idNumber: string, idType: IdTypes)
-  {
-
-    this.logger.log(`started calling system for idType : ${ idType }`)
-    let systemurl: string = this.configService.get("CITIZEN_IMG") || '';
+  async callSystemToGetPerson(token: string, idNumber: string, idType: IdTypes): Promise<Person> {
+    this.logger.log(`started calling system for idType : ${idType}`);
+    let systemurl: string = this.configService.get('CITIZEN_IMG') || '';
     // Get Image by Work Permit
-    if ((idType.toLowerCase()).match(IdTypes.WorkPermit.toLowerCase()))
-    {
+    if (idType.toLowerCase().match(IdTypes.WorkPermit.toLowerCase())) {
       systemurl = this.configService.get('IMMI_IMG') || '';
     }
     // Get Image by Passport number
-    if ((idType.toLowerCase()).match(IdTypes.Passport.toLowerCase()))
-    {
+    if (idType.toLowerCase().match(IdTypes.Passport.toLowerCase())) {
       systemurl = this.configService.get('IMM_IMG_PP') || '';
     }
-    systemurl = `${ systemurl }${ idNumber }`;
-    this.logger.log(`started calling system : url : ${ systemurl }`)
-    try
-    {
-      let response: PersonDTO = await lastValueFrom(this.httpService.get(systemurl, { headers: { "Authorization": `Bearer ${ token }` } })
-        .pipe(
-          map(response =>
-          {
-            return response.data
-          })
-        )).then((data) =>
-        {
-          return this.getData(data, idType);
-        });
-
+    systemurl = `${systemurl}${idNumber}`;
+    this.logger.log(`started calling system : url : ${systemurl}`);
+    try {
+      const response: string = await lastValueFrom(
+        this.httpService
+          .get(systemurl, { headers: { Authorization: `Bearer ${token}` } })
+          .pipe(map((response) => response.data))
+      ).then((data) => this.getData(data, idType));
       return response;
-    } catch (error)
-    {
-      this.logger.error(`ERROR in POST : ${ JSON.stringify(error) }`);
-      if (
-        error
-          .toString()
-          .includes(CommonConstants.RESP_ERR_HTTP_INVALID_HEADER_VALUE)
-      )
-      {
+    } catch (error) {
+      this.logger.error(`ERROR in POST : ${JSON.stringify(error)}`);
+      if (error.toString().includes(CommonConstants.RESP_ERR_HTTP_INVALID_HEADER_VALUE)) {
         throw new HttpException(
           {
             statusCode: HttpStatus.UNAUTHORIZED,
-            error: CommonConstants.UNAUTH_MSG,
+            error: CommonConstants.UNAUTH_MSG
           },
           HttpStatus.UNAUTHORIZED
         );
       }
-      if (error.toString().includes(CommonConstants.RESP_ERR_NOT_FOUND))
-      {
+      if (error.toString().includes(CommonConstants.RESP_ERR_NOT_FOUND)) {
         throw new HttpException(
           {
             statusCode: HttpStatus.NOT_FOUND,
-            error: error.message,
+            error: error.message
           },
           HttpStatus.NOT_FOUND
         );
       }
-      if (error.toString().includes(CommonConstants.RESP_BAD_REQUEST))
-      {
+      if (error.toString().includes(CommonConstants.RESP_BAD_REQUEST)) {
         throw new HttpException(
           {
             statusCode: HttpStatus.BAD_REQUEST,
-            error: error.message,
+            error: error.message
           },
           HttpStatus.BAD_REQUEST
         );
       }
-      if (
-        error.toString().includes(CommonConstants.RESP_ERR_UNPROCESSABLE_ENTITY)
-      )
-      {
+      if (error.toString().includes(CommonConstants.RESP_ERR_UNPROCESSABLE_ENTITY)) {
         throw new HttpException(
           {
             statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-            error: error.message,
+            error: error.message
           },
           HttpStatus.UNPROCESSABLE_ENTITY
         );
-      } else
-      {
+      } else {
         throw new HttpException(
           {
             statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-            error: "Something went wrong.",
+            error: 'Something went wrong.'
           },
           HttpStatus.INTERNAL_SERVER_ERROR
         );
@@ -167,20 +134,15 @@ export class SystemRepository
     }
   }
 
-  getData (data: any, system: string)
-  {
-    let result: any;
-    if (system.match(IdTypes.Citizenship))
-    {
-      result = Object.keys(data[ "citizenimages" ]).length > 0 ? data[ "citizenimages" ][ "citizenimage" ][ 0 ] : undefined
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
+  getData(data: any, system: string): string {
+    let result: string =
+      0 < Object.keys(data['citizenimages']).length ? data['citizenimages']['citizenimage'][0] : undefined;
+    if (system.match(IdTypes.WorkPermit)) {
+      result = 0 < Object.keys(data['ImmiImages']).length ? data['ImmiImages']['ImmiImage'][0] : undefined;
     }
-    if (system.match(IdTypes.WorkPermit))
-    {
-      result = Object.keys(data[ "ImmiImages" ]).length > 0 ? data[ "ImmiImages" ][ "ImmiImage" ][ 0 ] : undefined
-    }
-    if (system.match(IdTypes.Passport))
-    {
-      result = Object.keys(data[ "ImmisImages" ]).length > 0 ? data[ "ImmisImages" ][ "ImmisImage" ][ 0 ] : undefined
+    if (system.match(IdTypes.Passport)) {
+      result = 0 < Object.keys(data['ImmisImages']).length ? data['ImmisImages']['ImmisImage'][0] : undefined;
     }
     return result;
   }

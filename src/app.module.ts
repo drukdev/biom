@@ -5,8 +5,9 @@ import { config } from '../config/config';
 import { validationSchema } from '../config/validation';
 import { TerminusModule } from '@nestjs/terminus';
 import { HealthController } from './health/health.controller';
-import { ExceptionHandler } from './commons/exception.handler';
+import ExceptionHandler from './common/exception.handler';
 import { PersonModule } from './person/module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -15,16 +16,17 @@ import { PersonModule } from './person/module';
       isGlobal: true,
       load: [config],
       envFilePath: `${process.cwd()}/.env`,
-      validationSchema: validationSchema,
+      validationSchema
     }),
     PersonModule,
+    AuthModule
   ],
   controllers: [HealthController],
   providers: [
     {
       provide: APP_FILTER,
-      useClass: ExceptionHandler,
-    },
-  ],
+      useClass: ExceptionHandler
+    }
+  ]
 })
 export class AppModule {}

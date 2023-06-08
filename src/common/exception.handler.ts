@@ -5,29 +5,32 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  RpcExceptionFilter
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { Request } from 'express';
 import { PrismaClient } from '@prisma/client';
-
-const { PrismaClientKnownRequestError , PrismaClientValidationError } = PrismaClient;
+const { PrismaClientKnownRequestError, PrismaClientValidationError } = PrismaClient;
+import { Observable, throwError } from 'rxjs';
+import { ResponseType } from './response.interface';
+import { RpcException } from '@nestjs/microservices';
 
 @Catch()
-export default class AllExceptionsFilter implements ExceptionFilter {
+export default class ExceptionHandler implements ExceptionFilter {
   constructor(private readonly httpAdapterHost: HttpAdapterHost) {}
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
   catch(exception: any, host: ArgumentsHost): void {
     const { httpAdapter } = this.httpAdapterHost;
-
     const ctx = host.switchToHttp();
     const request = ctx.getRequest<Request>();
 
-    let httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+    let httpStatus = exception.status; //HttpStatus.INTERNAL_SERVER_ERROR;
     let message = '';
     switch (exception.constructor) {
       case HttpException:
         httpStatus = (exception as HttpException).getStatus();
-        message = exception?.message || 'Internal server error';
+        message = exception?.response?.message || exception?.message || 'Internal server error';
         break;
       case PrismaClientKnownRequestError:
         switch (exception.code) {
@@ -42,7 +45,7 @@ export default class AllExceptionsFilter implements ExceptionFilter {
           case 'P2021': // The table {table} does not exist in the current database.
           case 'P2022': // The column {column} does not exist in the current database.
             httpStatus = HttpStatus.BAD_REQUEST;
-            message = exception?.message;
+            message = exception?.response?.message || exception?.message;
             break;
           case 'P2018': // The required connected records were not found. {details}
           case 'P2025': // An operation failed because it depends on one or more records that were required but not found. {cause}
@@ -52,17 +55,22 @@ export default class AllExceptionsFilter implements ExceptionFilter {
             break;
           default:
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-            message = exception?.message || 'Internal server error';
+            message = exception?.response?.message || exception?.message || 'Internal server error';
         }
         break;
       case PrismaClientValidationError:
         httpStatus = HttpStatus.BAD_REQUEST;
+        message = exception?.message || exception?.response?.message;
+        break;
+      case RpcException:
+        httpStatus = exception?.code || exception?.error?.code || HttpStatus.BAD_REQUEST;
         message = exception?.message;
         break;
       default:
         httpStatus =
           exception.response?.status ||
           exception.response?.statusCode ||
+          exception.code ||
           HttpStatus.INTERNAL_SERVER_ERROR;
         message =
           exception.response?.data?.message ||
@@ -71,19 +79,24 @@ export default class AllExceptionsFilter implements ExceptionFilter {
           'Internal server error';
     }
 
-    Logger.error(
-      'Exception Filter :',
-      message,
-      (exception as any).stack,
-      `${request.method} ${request.url}`,
-    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Logger.error('Exception Filter :', message, (exception as any).stack, `${request.method} ${request.url}`);
 
-    const responseBody = {
+    const responseBody: ResponseType = {
       statusCode: httpStatus,
       timestamp: new Date().toISOString(),
-      message,
+      message
     };
 
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
+  }
+}
+
+@Catch(RpcException)
+export class CustomExceptionFilter implements RpcExceptionFilter<RpcException> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+  catch(exception: RpcException, host: ArgumentsHost): Observable<any> {
+    //throw new RpcException({message:exception.getError(),code:HttpStatus.BAD_REQUEST});
+    return throwError(() => new RpcException({ message: exception.getError(), code: HttpStatus.BAD_REQUEST }));
   }
 }

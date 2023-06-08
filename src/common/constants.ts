@@ -12,16 +12,16 @@ export enum CommonConstants {
   RESP_CONFLICT = 409,
   RESP_FAILURE_NOT_MATCHED = 'Data does not match',
   SERVER_ERROR = 'Error from biometric comparision',
+  BAD_REQUEST = 'Bad Request',
 
   // SUCCESS MESSAGE
   RESP_SUCCESS_200 = 200,
   RESP_SUCCESS_201 = 201,
   RESP_SUCCESS_204 = 204,
   RESP_SUCCESS_MSG = 'success'
-  
 }
 
 export enum ServiceConstants {
   NATS_ENDPOINT = 'biometricService',
-  COMPARE_BM = 'compareBiometrics',
+  COMPARE_BM = 'compareBiometrics'
 }

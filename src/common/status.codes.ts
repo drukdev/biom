@@ -3,4 +3,5 @@ export enum statusCode {
   INSERT = 201,
   DELETE = 204,
   NOT_FOUND = 404,
+  BAD_REQUEST = 400
 }

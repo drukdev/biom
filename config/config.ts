@@ -5,5 +5,6 @@ export const config = () => ({
 
   nats: {
     url: process.env.NATS_URL,
+    NKEY_SEED: process.env.NKEY_SEED
   }
 });

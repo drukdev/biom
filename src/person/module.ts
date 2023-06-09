@@ -5,7 +5,8 @@ import { HttpModule } from '@nestjs/axios';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule } from '@nestjs/config';
-import NATSClientService from 'src/common/NATSClientService';
+import NATSClientService from '../common/NATSClientService';
+import { nkeyAuthenticator } from 'nats';
 
 @Module({
   imports: [
@@ -15,11 +16,10 @@ import NATSClientService from 'src/common/NATSClientService';
         name: 'NATS_CLIENT',
         transport: Transport.NATS,
         options: {
-          servers: [`${process.env.NATS_URL}`]
-          // deserializer: new InboundMessageIdentityDeserializer(),
-          // serializer: new OutboundResponseIdentitySerializer(),
+          servers: [`${process.env.NATS_URL}` as string],
+          authenticator: nkeyAuthenticator(new TextEncoder().encode(process.env.NKEY_SEED))
         }
-      }
+      },
     ]),
     HttpModule,
     NestjsFormDataModule

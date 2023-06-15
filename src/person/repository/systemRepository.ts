@@ -40,13 +40,13 @@ export class SystemRepository {
         ).then((data: AuthTokenResponse) => plainToInstance(AuthTokenResponse, data));
 
         if (null != tokenResponse || tokenResponse != undefined) {
-          const fetchedPerson: PersonDTO = await this.callSystemToGetPerson(
+          const fetchedPerson: PersonDTO | Person = await this.callSystemToGetPerson(
             tokenResponse.accessToken,
             person.idNumber,
             person.idType
           );
           this.logger.log(`fetchedPerson : ${fetchedPerson}`);
-          if (fetchedPerson == undefined || fetchedPerson.image == undefined || null == fetchedPerson.image) {
+          if (fetchedPerson == undefined || fetchedPerson['image'] == undefined || null == fetchedPerson['image']) {
             throw new HttpException(
               {
                 statusCode: HttpStatus.NOT_FOUND,
@@ -55,8 +55,7 @@ export class SystemRepository {
               HttpStatus.NOT_FOUND
             );
           } else {
-            this.logger.log(`citizen image : ${fetchedPerson.image.length}`);
-            return fetchedPerson.image;
+            return fetchedPerson['image'];
           }
         }
       }
@@ -65,7 +64,7 @@ export class SystemRepository {
     }
   }
 
-  async callSystemToGetPerson(token: string, idNumber: string, idType: IdTypes): Promise<Person> {
+  async callSystemToGetPerson(token: string, idNumber: string, idType: IdTypes): Promise<PersonDTO | Person> {
     this.logger.log(`started calling system for idType : ${idType}`);
     let systemurl: string = this.configService.get('CITIZEN_IMG') || '';
     // Get Image by Work Permit
@@ -79,11 +78,11 @@ export class SystemRepository {
     systemurl = `${systemurl}${idNumber}`;
     this.logger.log(`started calling system : url : ${systemurl}`);
     try {
-      const response: string = await lastValueFrom(
+      const response: Person | PersonDTO = await lastValueFrom(
         this.httpService
           .get(systemurl, { headers: { Authorization: `Bearer ${token}` } })
           .pipe(map((response) => response.data))
-      ).then((data) => this.getData(data, idType));
+      ).then((data: Person) => this.getData(data, idType));
       return response;
     } catch (error) {
       this.logger.error(`ERROR in POST : ${JSON.stringify(error)}`);
@@ -135,8 +134,8 @@ export class SystemRepository {
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
-  getData(data: any, system: string): string {
-    let result: string =
+  getData(data: any, system: string): Person | PersonDTO {
+    let result: Person | PersonDTO =
       0 < Object.keys(data['citizenimages']).length ? data['citizenimages']['citizenimage'][0] : undefined;
     if (system.match(IdTypes.WorkPermit)) {
       result = 0 < Object.keys(data['ImmiImages']).length ? data['ImmiImages']['ImmiImage'][0] : undefined;

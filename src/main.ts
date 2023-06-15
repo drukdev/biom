@@ -15,12 +15,14 @@ async function bootstrap(): Promise<void> {
     logger: new MyLogger()
   });
   const configService = app.get(ConfigService);
-app.setGlobalPrefix('biometric')
+  app.setGlobalPrefix('biometric');
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.NATS,
     options: {
-      servers: configService.get('nats').url,
-      authenticator: nkeyAuthenticator(new TextEncoder().encode(configService.get('nats').NKEY_SEED))
+      servers: configService.get('NATS_URL'),
+      authenticator: nkeyAuthenticator(new TextEncoder().encode(
+        configService.get('NKEY_SEED')
+      ))
     }
   });
   app.useGlobalPipes(new ValidationPipe());
@@ -36,7 +38,7 @@ app.setGlobalPrefix('biometric')
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup("/biometric/swagger", app, document);
+  SwaggerModule.setup('/biometric/swagger', app, document);
   await app.startAllMicroservices();
   await app.listen(configService.get('PORT') || 3000, () => {
     logger.log(`Listening on Port:${configService.get('PORT')}` || 3000);

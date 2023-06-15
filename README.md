@@ -57,19 +57,6 @@ When you're ready to make this README your own, just edit this file and use the 
 ```bash
 $ npm install
 ```
-
-## Postgres Installation
-[Postgres](https://hub.docker.com/_/postgres) docker pull postgres.
-
-# start a postgres instance
-docker run --name some-postgres -p 5432:5432 -e POSTGRES_PASSWORD=password -d postgres
-# create new database
-docker exec -it some-postgres psql -U postgres
-https://medium.com/coding-blocks/creating-user-database-and-adding-access-on-postgresql-8bfcd2f4a91e
-
-# postgres GUI 
-https://dbeaver.io/download/
-
 ## Install Elasticsearch, Kibana and filebeat
 [Elasticsearch, Kibana and Filebeat](https://www.elastic.co/guide/en/elastic-stack-get-started/current/get-started-elastic-stack.html#get-started-elastic-stack).
 

@@ -30,7 +30,9 @@ RUN apt-get install -y openssl
 
 
 # Copy the bundled code from the build stage to the production image
-COPY --from=build /usr/src/app/node_modules ./node_modules
+COPY --from=build /usr/src/app/package*.json ./
+RUN yarn
+#COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/dist ./dist
 
 EXPOSE 3001

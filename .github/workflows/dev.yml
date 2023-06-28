@@ -26,7 +26,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "bio.tar"
-          target: "/home/ubuntu/workspace/biometric-service/cicd/bio"
+          target: "/home/ubuntu/workspace/biometric-service"
 
       - name: SSH command
         uses: appleboy/ssh-action@master
@@ -36,7 +36,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SERVER_PASSPHRASE }}
           script: |
-            cd /home/ubuntu/workspace/biometric-service/cicd/bio
+            cd /home/ubuntu/workspace/biometric-service
             sudo docker stop bio || true
             sudo docker rm -f bio || true
             sudo docker load -i bio.tar

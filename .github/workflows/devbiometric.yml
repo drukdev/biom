@@ -26,9 +26,9 @@ jobs:
           username: ${{ secrets.DEV_BIOMETRIC_USERNAME }}
           key: ${{ secrets.DEV_BIOMETRIC_PRIVATE_KEY }}
           source: "biometric.tar"
-          target: "/usr/bin/biometric"
+          target: "/home/ubuntu/workspace/biometric-service"
 
-      - name: SSH command
+      - name: Deploy the changes
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.DEV_BIOMETRIC_IP }}
@@ -36,7 +36,7 @@ jobs:
           key: ${{ secrets.DEV_BIOMETRIC_PRIVATE_KEY }}
           passphrase: ${{ secrets.SERVER_PASSPHRASE }}
           script: |
-            cd /usr/bin/biometric
+            cd /home/ubuntu/workspace/biometric-service
             sudo docker stop biometric || true
             sudo docker rm -f biometric || true
             sudo docker load -i biometric.tar

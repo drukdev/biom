@@ -1,23 +1,31 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PersonDTO } from '../dto/person';
-import { BiometricRepository } from '../repository/biometricsRepository';
 import { ConfigService } from '@nestjs/config';
-import { HttpService } from '@nestjs/axios';
-import { CommonConstants } from 'src/common/constants';
-import { SystemRepository } from '../repository/systemRepository';
+
 import * as fs from 'fs';
-import { ResponseType } from 'src/common/response.interface';
+
+import { AsyncLocalStorage } from 'async_hooks';
+
+
+import { BiometricRepository } from '../repository/biometricsRepository';
+import { SystemRepository } from '../repository/systemRepository';
+import { CommonConstants } from '../../common/constants';
+import { NDILogger } from '../../logger/logger.service';
+import { LoggerClsStore } from '../../logger/logger.store';
+import { ResponseType } from '../../common/response.interface';
 @Injectable()
 export class BiometricService {
-  private readonly logger = new Logger(BiometricService.name);
-  private biometricRepo: BiometricRepository;
-  private systemRepository: SystemRepository;
-  constructor(private readonly httpService: HttpService, private configService: ConfigService) {
-    this.biometricRepo = new BiometricRepository(this.configService);
-    this.systemRepository = new SystemRepository(this.httpService, this.configService);
-  }
+  
+   constructor(
+    private readonly configService: ConfigService,
+    private readonly biometricRepo: BiometricRepository,
+    private readonly systemRepository: SystemRepository,
+    private readonly als: AsyncLocalStorage<LoggerClsStore>,
+    private readonly ndiLogger: NDILogger
+    ) { }
   public async compareImage(image: Buffer, person: PersonDTO): Promise<ResponseType> {
-    this.logger.log('Start to compare images');
+    const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
+    ndiLogger.log('Start to compare images');
     let personImg: ArrayBufferLike;
     const returnResult = {} as ResponseType;
     try {
@@ -68,7 +76,7 @@ export class BiometricService {
         returnResult.error = 'Invalid Biometric';
       } else {
         const result: boolean = compatibility > this.configService.get('THRESHOLD');
-        this.logger.debug(`result of comparision : ${JSON.stringify(result)}`);
+        ndiLogger.debug(`result of comparision : ${JSON.stringify(result)}`);
         returnResult.statusCode = CommonConstants.RESP_SUCCESS_200;
         returnResult.message = 'success';
         if (!result) {
@@ -78,7 +86,7 @@ export class BiometricService {
         returnResult.data = { compatibility };
       }
     } catch (error) {
-      this.logger.error(`error in biometric : ${error}`);
+      ndiLogger.error(`error in biometric : ${error}`);
       returnResult.statusCode = CommonConstants.RESP_ERR_500;
       returnResult.error = CommonConstants.SERVER_ERROR;
     }

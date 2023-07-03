@@ -48,7 +48,7 @@ export default class ExceptionHandler implements ExceptionFilter {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Logger.error('Exception Filter :', message, (exception as any).stack, `${request.method} ${request.url}`);
+    Logger.error(`Exception Filter : ${message} ${(exception as any).stack} ${request.method} ${request.url}`);
 
     const responseBody: ResponseType = {
       statusCode: httpStatus,

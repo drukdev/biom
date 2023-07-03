@@ -1,12 +1,17 @@
 import { Module } from '@nestjs/common';
-import { BiometricService } from './services/biometricService';
-import { PersonController } from './controller/controller';
 import { HttpModule } from '@nestjs/axios';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule } from '@nestjs/config';
-import NATSClientService from '../common/NATSClientService';
 import { nkeyAuthenticator } from 'nats';
+import { AlsModule } from '../AsyncLocalStorage/als.module';
+import NATSClientService from '../common/NATSClientService';
+import { LoggerModule } from '../logger/logger.module';
+import { PersonController } from './controller/controller';
+import { BiometricRepository } from './repository/biometricsRepository';
+import { SystemRepository } from './repository/systemRepository';
+import { BiometricService } from './services/biometricService';
+
 
 @Module({
   imports: [
@@ -19,12 +24,14 @@ import { nkeyAuthenticator } from 'nats';
           servers: [`${process.env.NATS_URL}` as string],
           authenticator: nkeyAuthenticator(new TextEncoder().encode(process.env.NKEY_SEED))
         }
-      },
+      }
     ]),
     HttpModule,
-    NestjsFormDataModule
+    NestjsFormDataModule,
+    AlsModule,
+    LoggerModule
   ],
   controllers: [PersonController],
-  providers: [BiometricService, NATSClientService]
+  providers: [BiometricService, NATSClientService, BiometricRepository, SystemRepository]
 })
 export class PersonModule {}

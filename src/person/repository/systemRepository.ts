@@ -1,23 +1,32 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as qs from 'qs';
 import { PersonDTO } from '../dto/person';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { lastValueFrom, map } from 'rxjs';
 import { AuthTokenResponse } from '../dto/auth-token-res.dto';
-import { CommonConstants } from 'src/common/constants';
-import { IdTypes } from 'src/common/IdTypes';
+import { CommonConstants } from '../../common/constants';
+import { IdTypes } from '../../common/IdTypes';
 import { AuthTokenRequest } from '../dto/auth-token-req.dto';
 import { plainToInstance } from 'class-transformer';
 import { Person } from '@regulaforensics/facesdk-webclient';
+import { NDILogger } from '../../logger/logger.service';
+import { LoggerClsStore } from '../../logger/logger.store';
+import { AsyncLocalStorage } from 'async_hooks';
 
 @Injectable()
 export class SystemRepository {
-  private readonly logger = new Logger(SystemRepository.name);
-  constructor(private readonly httpService: HttpService, private configService: ConfigService) {}
+  
+  constructor(
+    private readonly httpService: HttpService,
+    private configService: ConfigService,
+    private readonly als: AsyncLocalStorage<LoggerClsStore>,
+    private readonly ndiLogger: NDILogger
+    ) {}
 
   async getCitizenImg(person: PersonDTO): Promise<string | undefined> {
-    this.logger.log(`start to get Citizen Image`);
+    const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
+    ndiLogger.log(`start to get Citizen Image`);
     try {
       if (null != person.idNumber) {
         // Get access token
@@ -34,7 +43,7 @@ export class SystemRepository {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
         };
-        this.logger.error(`sso_url : ${ssoUrl}`);
+        ndiLogger.error(`sso_url : ${ssoUrl}`);
         const tokenResponse: AuthTokenResponse = await lastValueFrom(
           this.httpService.post(ssoUrl, qs.stringify(payload), config).pipe(map((response) => response.data))
         ).then((data: AuthTokenResponse) => plainToInstance(AuthTokenResponse, data));
@@ -45,7 +54,6 @@ export class SystemRepository {
             person.idNumber,
             person.idType
           );
-          this.logger.log(`fetchedPerson : ${fetchedPerson}`);
           if (fetchedPerson == undefined || fetchedPerson['image'] == undefined || null == fetchedPerson['image']) {
             throw new HttpException(
               {
@@ -60,12 +68,13 @@ export class SystemRepository {
         }
       }
     } catch (err) {
-      this.logger.error(err);
+      ndiLogger.error(err);
     }
   }
 
   async callSystemToGetPerson(token: string, idNumber: string, idType: IdTypes): Promise<PersonDTO | Person> {
-    this.logger.log(`started calling system for idType : ${idType}`);
+    const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
+    ndiLogger.log(`started calling system for idType : ${idType}`);
     let systemurl: string = this.configService.get('CITIZEN_IMG') || '';
     // Get Image by Work Permit
     if (idType.toLowerCase().match(IdTypes.WorkPermit.toLowerCase())) {
@@ -76,7 +85,7 @@ export class SystemRepository {
       systemurl = this.configService.get('IMM_IMG_PP') || '';
     }
     systemurl = `${systemurl}${idNumber}`;
-    this.logger.log(`started calling system : url : ${systemurl}`);
+    ndiLogger.log(`started calling system : url : ${systemurl}`);
     try {
       const response: Person | PersonDTO = await lastValueFrom(
         this.httpService
@@ -85,7 +94,7 @@ export class SystemRepository {
       ).then((data: Person) => this.getData(data, idType));
       return response;
     } catch (error) {
-      this.logger.error(`ERROR in POST : ${JSON.stringify(error)}`);
+      ndiLogger.error(`ERROR in POST : ${JSON.stringify(error)}`);
       if (error.toString().includes(CommonConstants.RESP_ERR_HTTP_INVALID_HEADER_VALUE)) {
         throw new HttpException(
           {

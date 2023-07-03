@@ -18,5 +18,11 @@ export const validationSchema = Joi.object({
   BM_SDK_BASE_PATH: Joi.string().required(),
   AWS_DEFAULT_REGION: Joi.string().required(),
   COGNITO_USER_POOL_ID: Joi.string().required(),
-  COGNITO_CLIENT_ID: Joi.string().required()
+  COGNITO_CLIENT_ID: Joi.string().required(),
+  SERVICE_NAME: Joi.string().required(),
+  ELK_LOG: Joi.string().required(),
+  CONSOLE_LOG: Joi.string().required(),
+  LOG_LEVEL: Joi.string().required(),
+  ELK_USERNAME: Joi.string().required(),
+  ELK_PASSWORD: Joi.string().required()
 });

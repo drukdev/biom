@@ -1,7 +1,7 @@
 import { IsString, IsBoolean, IsEnum, IsNotEmpty, IsOptional, ValidateIf } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IdTypes } from 'src/common/IdTypes';
-import { BloodType } from 'src/common/bloodType';
+import { IdTypes } from '../../common/IdTypes';
+import { BloodType } from '../../common/bloodType';
 import { Expose } from 'class-transformer';
 
 export class PersonDTO {

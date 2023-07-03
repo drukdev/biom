@@ -11,10 +11,13 @@
     "baseUrl": "./",
     "incremental": true,
     "strictNullChecks": false,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    // "paths": {
+    //   "@src/*": ["src/*"],
+    //   "@lib/*": ["lib/*"],
+    //   "@config/*": ["config/*"]
+    // }
     // "noUnusedLocals": true
-    "skipLibCheck": true
   },
   "exclude": ["node_modules", "./dist/**/*"]
 }

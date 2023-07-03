@@ -1,19 +1,26 @@
-import { Body, Controller, InternalServerErrorException, Logger, Post, UseGuards } from '@nestjs/common';
-import { BiometricService } from '../services/biometricService';
-import { CommonConstants, ServiceConstants } from 'src/common/constants';
+import { Body, Controller, InternalServerErrorException, Post, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BiometricService } from '../../person/services/biometricService';
+import { CommonConstants, ServiceConstants } from '../../common/constants';
 import { MessagePattern } from '@nestjs/microservices';
-import { PersonDTO } from '../dto/person';
+import { PersonDTO } from '../../person/dto/person';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { ResponseType } from 'src/common/response.interface';
-import { statusCode } from 'src/common/status.codes';
-import { IdTypes } from 'src/common/IdTypes';
+import { ResponseType } from '../../common/response.interface';
+import { statusCode } from '../../common/status.codes';
+import { IdTypes } from '../../common/IdTypes';
+import { NDILogger } from '../../logger/logger.service';
+import { LoggerClsStore } from '../../logger/logger.store';
+import { AsyncLocalStorage } from 'async_hooks';
+import { LoggingInterceptor } from '../../logger/logging.interceptor';
 
 @Controller()
 @ApiBearerAuth()
 export class PersonController {
-  private readonly logger = new Logger(PersonController.name);
-  constructor(private readonly biometricService: BiometricService) {}
+  constructor(
+    private readonly biometricService: BiometricService,
+    private readonly als: AsyncLocalStorage<LoggerClsStore>,
+    private readonly ndiLogger: NDILogger
+    ) {}
 
   @Post('validate')
   @UseGuards(AuthGuard('jwt'))
@@ -26,11 +33,12 @@ export class PersonController {
     description: 'Returns compatibility and result'
   })
   async compareBiometricAPI(@Body() newPerson: PersonDTO): Promise<ResponseType> {
+    const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
     try {
-      this.logger.log(`compareBiometric starts`);
+      ndiLogger.log(`compareBiometric starts`);
 
       if ('undefined' == typeof newPerson.fullName || 'undefined' == typeof newPerson.idNumber) {
-        this.logger.log('BAD REQUEST');
+        ndiLogger.log('BAD REQUEST');
         const result: ResponseType = {
           statusCode: statusCode.BAD_REQUEST,
           data: newPerson,
@@ -43,25 +51,27 @@ export class PersonController {
       // Base64 string to image
       const imgBuffer: Buffer = Buffer.from(newPerson.image, 'base64');
       const result = await this.biometricService.compareImage(imgBuffer, newPerson);
-      this.logger.log(`result : ${JSON.stringify(result)}`);
+      ndiLogger.log(`result : ${JSON.stringify(result)}`);
       return result;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
   }
 
+  @UseInterceptors(LoggingInterceptor)
   @MessagePattern({
     endpoint: `${ServiceConstants.NATS_ENDPOINT}/${ServiceConstants.COMPARE_BM}`
   })
   async compareBiometric(@Body() person: PersonDTO): Promise<ResponseType> {
+    const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
     try {
-      this.logger.log(`compareBiometric starts`);
+      ndiLogger.log(`compareBiometric starts`);
 
-      this.logger.log((!person.isBhutanese && person.idType.includes(IdTypes.Citizenship)) || (!person.isBhutanese && [IdTypes.Passport, IdTypes.WorkPermit].includes(person.idType)));
+    ndiLogger.log(`${(!person.isBhutanese && person.idType.includes(IdTypes.Citizenship))} || ${(!person.isBhutanese && [IdTypes.Passport, IdTypes.WorkPermit].includes(person.idType))}`);
 
       if ('undefined' == typeof person.fullName || 'undefined' == typeof person.idNumber) {
         if ((!person.isBhutanese && person.idType.includes(IdTypes.Citizenship)) && (!person.isBhutanese && [IdTypes.Passport, IdTypes.WorkPermit].includes(person.idType))) {
-        this.logger.log('BAD REQUEST');
+        ndiLogger.log('BAD REQUEST');
         const result: ResponseType = {
           statusCode: statusCode.BAD_REQUEST,
           data: person,
@@ -75,7 +85,7 @@ export class PersonController {
       // Base64 string to image
       const imgBuffer: Buffer = Buffer.from(person.image, 'base64');
       const result = await this.biometricService.compareImage(imgBuffer, person);
-      this.logger.log(`result : ${JSON.stringify(result)}`);
+      ndiLogger.log(`result : ${JSON.stringify(result)}`);
       return result;
     } catch (error) {
       throw new InternalServerErrorException(error.message);

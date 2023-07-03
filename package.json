@@ -8,7 +8,8 @@
   "scripts": {
     "clean": "rm -r dist",
     "prebuild": "rimraf dist",
-    "build": "nest build",
+    "copy:assets":"cp -r ./src/person/services/temporaryUpload ./dist/src/person/services/temporaryUpload",
+    "build": "nest build && copy:assets",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "start": "nest start",

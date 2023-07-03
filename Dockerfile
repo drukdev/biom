@@ -31,9 +31,9 @@ RUN apt-get install -y openssl
 
 # Copy the bundled code from the build stage to the production image
 COPY --from=build /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /usr/src/app/dist .
 
 EXPOSE 3001
 
 # Start the server using the production build
-CMD ["node", "dist/src/main"]
+CMD ["node", "/src/main"]

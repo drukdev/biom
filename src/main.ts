@@ -28,7 +28,7 @@ async function bootstrap(): Promise<void> {
   app.use(bodyParser.json({ limit: '5mb' }));
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Biometric Service')
+    .setTitle('Biometric Service Test CICD')
     .setDescription('NDI Biometric Service Module')
     .setVersion('1.0')
     .build();

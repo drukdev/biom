@@ -1,0 +1,43 @@
+name: Docker Deploy
+
+on:
+  push:
+    tags:
+      - qa-'*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Build Docker image
+        run: docker build -t biometric .
+        
+      - name: Save Docker image
+        run: docker save biometric:latest > biometric.tar
+        
+      - name: Transfer Docker image
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.QA_BIOMETRIC_IP }}
+          username: ${{ secrets.QA_BIOMETRIC_USERNAME }}
+          key: ${{ secrets.QA_BIOMETRIC_PRIVATE_KEY }}
+          source: "biometric.tar"
+          target: "/home/ubuntu/workspace/biometric-service"
+
+      - name: Deploy the changes
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.QA_BIOMETRIC_IP }}
+          username: ${{ secrets.QA_BIOMETRIC_USERNAME }}
+          key: ${{ secrets.QA_BIOMETRIC_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SERVER_PASSPHRASE }}
+          script: |
+            cd /home/ubuntu/workspace/biometric-service
+            sudo docker stop biometric || true
+            sudo docker rm -f biometric || true
+            sudo docker load -i biometric.tar
+            sudo docker run --name biometric -dp 3001:3001 --env-file .env biometric

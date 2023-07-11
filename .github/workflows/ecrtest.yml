@@ -22,15 +22,15 @@ jobs:
       - name: Login to AWS ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build and tag Docker image
+        
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: biometric
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t biometric:test .
-          docker tag biometric:test 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
-
-      - name: Push Docker image to AWS ECR
-        run: |
-          docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
+         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:test .
+         docker push $ECR_REGISTRY/$ECR_REPOSITORY:test
 
       - name: SSH into EC2 instance and pull Docker image
         uses: appleboy/ssh-action@master

@@ -24,7 +24,7 @@ jobs:
         with:
           registry: 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
           username: AWS
-          password: ${{ secrets.AWS_ACCESS_TOKEN }}
+          #password: ${{ secrets.AWS_ACCESS_TOKEN }}
 
       - name: Build and tag Docker image
         run: |

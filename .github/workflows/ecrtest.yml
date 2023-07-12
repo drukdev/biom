@@ -43,5 +43,5 @@ jobs:
           key: ${{ secrets.EC2_ECR_PRIVATE_KEY }}
           passphrase: ${{ secrets.EC2_INSTANCE_PASSPHRASE }}
           script: |
-            docker login -u AWS -p "$(aws ecr get-login-password --region ap-southeast-1)" 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
+            eval "$(aws ecr get-login --no-include-email --region ap-southeast-1)"
             docker pull 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test

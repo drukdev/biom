@@ -32,7 +32,7 @@ jobs:
 
       - name: Push Docker image to ECR
         run: |
-         docker push public.ecr.aws/biometric:latest
+         docker push 589943763826.public.ecr.aws/biometric:test
 
 
       - name: SSH into EC2 instance and pull Docker image

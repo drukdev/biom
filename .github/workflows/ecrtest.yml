@@ -22,19 +22,14 @@ jobs:
       - name: Log in to ECR
         run: |
           aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
-    
 
       - name: Build and tag Docker image
         run: |
           docker build -t biometric:test .
           docker tag biometric:test 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
+      - name: Push Docker image to AWS ECR
+        run: docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
 
       - name: SSH into EC2 instance and pull Docker image
         uses: appleboy/ssh-action@master

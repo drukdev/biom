@@ -30,7 +30,7 @@ jobs:
           docker tag biometric:test 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v2.7.0
+        uses: docker/build-push-action@v2
         with:
           context: .
           push: true

@@ -32,7 +32,8 @@ jobs:
 
       - name: Push Docker image to ECR
         run: |
-         docker push 589943763826.public.ecr.aws/biometric:test
+         docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
+
 
 
       - name: SSH into EC2 instance and pull Docker image

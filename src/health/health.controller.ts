@@ -8,13 +8,16 @@ import {
   HealthCheckResult,
   HealthIndicatorResult
 } from '@nestjs/terminus';
+import { nkeyAuthenticator } from 'nats';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('health')
 export class HealthController {
   constructor(
     private health: HealthCheckService,
     private microservice: MicroserviceHealthIndicator,
-    private http: HttpHealthIndicator
+    private http: HttpHealthIndicator,
+    private readonly configService: ConfigService
   ) {}
 
   @Get()
@@ -24,11 +27,12 @@ export class HealthController {
       async (): Promise<HealthIndicatorResult> => this.microservice.pingCheck('NATS-server', {
           transport: Transport.NATS,
           options: {
-            servers: [`${process.env.NATS_URL}`]
+            servers: [`${process.env.NATS_URL}`],
+            authenticator: nkeyAuthenticator(new TextEncoder().encode(
+              this.configService.get('NKEY_SEED')
+            ))
           }
         })
-      //async () => this.http.pingCheck('agent-service', 'http://localhost:3002/swagger'),
-      //async () => this.http.pingCheck('Biometric-service', 'http://localhost:3000/swagger'),
     ]);
   }
 }

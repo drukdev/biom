@@ -53,8 +53,6 @@ export class AppModule {
             `${req.method}-${req.baseUrl}`
           )
         };
-
-        store.ndiLogger.log('In route configuration');
         // and pass the "next" function as callback
         // to the "als.run" method together with the store.
         this.als.run(store, () => next());

@@ -25,7 +25,8 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t test .
+          (aws ecr get-login --no-include-email --region ap-southeast-1)
+          docker build -t 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test .
           sudo docker ps -a
           docker tag biometric:test 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
 

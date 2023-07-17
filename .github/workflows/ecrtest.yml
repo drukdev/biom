@@ -25,7 +25,8 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t test1 .
+          docker build -t public.ecr.aws/j6t0q4t3/biometric/biometric:test .
+
           docker tag test1 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
 
       - name: Push Docker image to AWS ECR

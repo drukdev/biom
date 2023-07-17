@@ -29,7 +29,7 @@ jobs:
           docker tag test1 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
 
       - name: Push Docker image to AWS ECR
-        run: docker push public.ecr.aws/j6t0q4t3/biometric/test1:test
+        run: docker push public.ecr.aws/j6t0q4t3/biometric/biometric:test
 
       - name: SSH into EC2 instance and pull Docker image
         uses: appleboy/ssh-action@master

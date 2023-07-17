@@ -27,7 +27,7 @@ jobs:
         run: |
           docker build -t 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test .
           sudo docker ps -a
-          docker tag 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
+          docker tag biometric:test biometric:test
 
       - name: Push Docker image to ECR
         run: docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test

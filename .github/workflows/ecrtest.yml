@@ -30,7 +30,7 @@ jobs:
 
       - name: Push Docker image to ECR
         run: |
-          docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
+          docker push --verbose 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
 
       - name: SSH into EC2 instance and pull Docker image
         uses: appleboy/ssh-action@master

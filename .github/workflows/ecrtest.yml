@@ -26,9 +26,10 @@ jobs:
 
       
       - name: Authenticate with AWS ECR
+        env:
+          AWS_ECR_LOGIN: ${{ secrets.AWS_ECR_LOGIN }}
         run: |
-          echo AWS_ECR_LOGIN=$(aws ecr get-login-password --region ap-southeast-1) >> $GITHUB_ENV
-          echo ::set-env name=AWS_ECR_LOGIN::$AWS_ECR_LOGIN
+          echo $AWS_ECR_LOGIN | docker login --username AWS --password-stdin 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
 
       - name: Push Docker image to ECR (authenticated)
         run: |

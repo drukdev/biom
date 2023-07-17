@@ -25,10 +25,13 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t public.ecr.aws/j6t0q4t3/biometric/biometric:test .
+          docker build -t biometric:test .
+          echo 'docker images'
+          docker images
+          docker ps -a
 
           #docker tag 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
-          docker tag biometric:test
+          #docker tag biometric:test
 
       - name: Push Docker image to AWS ECR
         run: docker push biometric:test public.ecr.aws/j6t0q4t3/biometric/biometric:test

@@ -24,10 +24,7 @@ jobs:
           docker build -t test:latest .
           docker tag test:latest 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:latest
 
-      - name: Push Docker image to ECR
-        run: |
-          docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:latest
-
+      
       - name: Authenticate with AWS ECR
         run: |
           echo AWS_ECR_LOGIN=$(aws ecr get-login-password --region ap-southeast-1) >> $GITHUB_ENV

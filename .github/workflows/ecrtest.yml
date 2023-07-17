@@ -29,6 +29,11 @@ jobs:
           docker tag biometric:test 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
           docker images
           
+      - name: Authenticate with AWS ECR
+        run: |
+          AWS_ECR_LOGIN=$(aws ecr get-login-password --region ap-southeast-1)
+          echo $AWS_ECR_LOGIN | docker login --username AWS --password-stdin 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
+          
       - name: Push Docker image to ECR
         run: |
           docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test

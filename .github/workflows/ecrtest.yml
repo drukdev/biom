@@ -26,11 +26,12 @@ jobs:
       - name: Build and tag Docker image
         run: |
           docker build -t biometric:test .
+          echo docker images
           docker tag biometric:test 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
 
       - name: Push Docker image to ECR
         run: |
-          docker push --verbose 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
+          docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
 
       - name: SSH into EC2 instance and pull Docker image
         uses: appleboy/ssh-action@master

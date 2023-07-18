@@ -56,4 +56,6 @@ jobs:
           script: |
             docker login -u AWS -p "$(aws ecr get-login-password --region ap-southeast-1)" 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
             docker pull 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometrictest:latest
-            docker run -d -p 3001:3001 --name latest 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometrictest:latest
+            sudo docker stop latest || true
+            sudo docker rm -f latest || true
+            sudo docker run -d -p 3001:3001 --name latest 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometrictest:latest

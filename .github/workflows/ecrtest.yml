@@ -25,26 +25,20 @@ jobs:
       - name: Log in to ECR
         run: 
           aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
-          #aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
           
       
       - name: Build and tag Docker image
         run: |
-          docker build -t biometrictest .
-          docker tag biometrictest:latest 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometrictest:latest
+          docker build -t biometricservice .
+          docker tag biometricservice:latest 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
           echo 'docker images'
           docker images
-        #docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometrictest:latest
 
-   # docker tag biometric:latest 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometrictest/biometric:test
           
-#          docker tag 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometric:test
-#          docker tag biometric:test
        
       - name: Push Docker image to AWS ECR
         run: 
-         # aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
-          docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometrictest:latest
+          docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
 
       - name: SSH into EC2 instance and pull Docker image
         uses: appleboy/ssh-action@master
@@ -55,7 +49,7 @@ jobs:
           passphrase: ${{ secrets.EC2_INSTANCE_PASSPHRASE }}
           script: |
             docker login -u AWS -p "$(aws ecr get-login-password --region ap-southeast-1)" 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
-            docker pull 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometrictest:latest
+            docker pull 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
             cd /home/ubuntu/workspace/biometric-service
             sudo docker stop latest || true
             sudo docker rm -f latest || true

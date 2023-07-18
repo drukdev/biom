@@ -30,7 +30,8 @@ jobs:
       
       - name: Build and tag Docker image
         run: |
-          docker build -t biometric .
+          docker build -t biometrictest .
+          docker tag biometrictest:latest 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometrictest:latest
           echo 'docker images'
           docker images
         #docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometrictest:latest

@@ -31,6 +31,7 @@ async function bootstrap(): Promise<void> {
     .setTitle('Biometric Service test with ECR')
     .setDescription('NDI Biometric Service Module')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

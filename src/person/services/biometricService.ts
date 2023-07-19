@@ -6,7 +6,6 @@ import * as fs from 'fs';
 
 import { AsyncLocalStorage } from 'async_hooks';
 
-
 import { BiometricRepository } from '../repository/biometricsRepository';
 import { SystemRepository } from '../repository/systemRepository';
 import { CommonConstants } from '../../common/constants';
@@ -15,14 +14,13 @@ import { LoggerClsStore } from '../../logger/logger.store';
 import { ResponseType } from '../../common/response.interface';
 @Injectable()
 export class BiometricService {
-  
-   constructor(
+  constructor(
     private readonly configService: ConfigService,
     private readonly biometricRepo: BiometricRepository,
     private readonly systemRepository: SystemRepository,
     private readonly als: AsyncLocalStorage<LoggerClsStore>,
     private readonly ndiLogger: NDILogger
-    ) { }
+  ) {}
   public async compareImage(image: Buffer, person: PersonDTO): Promise<ResponseType> {
     const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
     ndiLogger.log('Start to compare images');
@@ -37,11 +35,11 @@ export class BiometricService {
           break;
         case '0194':
         case '0195':
-          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}ekta.jpeg`);
+          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}makrand.jpeg`);
           break;
         case '0192':
         case '0193':
-          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}dhruv.png`);
+          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}vivek.png`);
           break;
         case 'E4089670':
           personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}jacques.png`);
@@ -55,8 +53,12 @@ export class BiometricService {
           personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}ankita.jpg`);
           break;
         case '0203':
+        case '0206':
+          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}rakesh.jpeg`);
+          break;
+        case '0201':
         case '0204':
-          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}anusha.jpeg`);
+          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}ashwini.jpeg`);
           break;
         default:
           personImg = await this.systemRepository

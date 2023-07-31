@@ -55,3 +55,38 @@ jobs:
             docker pull 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
             cd /home/ubuntu/workspace/biometric-service
             sudo docker run -d -p 3001:3001 --name biometric-service --env-file .env 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
+			
+			
+	   
+      - name: Notify on Success
+        if: success()
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.TOKEN }}
+          script: |
+            const recipients = '${{ secrets.EMAIL_RECIPIENTS }}'.split(/[;,]/);
+            recipients.forEach(email => {
+              github.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body: `CI/CD pipeline of Biometric succeeded! 🚀 Notifying ${email}`
+              });
+            })
+
+    
+      - name: Notify on Failure
+        if: failure()
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.TOKEN }}
+          script: |
+            const recipients = '${{ secrets.EMAIL_RECIPIENTS }}'.split(/[;,]/);
+            recipients.forEach(email => {
+              github.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body: `CI/CD pipeline of Biometric failed! 😢 Notifying ${email}`
+              });
+            })

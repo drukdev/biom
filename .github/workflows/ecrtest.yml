@@ -57,8 +57,6 @@ jobs:
         if: success() # Only runs when the job succeeds
         env:
           AWS_DEFAULT_REGION: ap-southeast-1  # Change to your desired AWS region
-          SES_SMTP_USERNAME: ${{ secrets.SES_SMTP_USERNAME }}
-          SES_SMTP_PASSWORD: ${{ secrets.SES_SMTP_PASSWORD }}
           EMAIL_FROM: pooja.jagtap@ayanworks.com
           EMAIL_TO_SUCCESS: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
@@ -68,16 +66,12 @@ jobs:
             --to "$EMAIL_TO_SUCCESS" \
             --subject "Success Notification" \
             --text "file:///tmp/email_body.txt" \
-            --region "$AWS_DEFAULT_REGION" \
-            --smtp-user "$SES_SMTP_USERNAME" \
-            --smtp-password "$SES_SMTP_PASSWORD"
+            --region "$AWS_DEFAULT_REGION"
 
       - name: Send Email Notification on Failure
         if: failure() # Only runs when the job fails
         env:
           AWS_DEFAULT_REGION: ap-southeast-1  # Change to your desired AWS region
-          SES_SMTP_USERNAME: ${{ secrets.SES_SMTP_USERNAME }}
-          SES_SMTP_PASSWORD: ${{ secrets.SES_SMTP_PASSWORD }}
           EMAIL_FROM: pooja.jagtap@ayanworks.com
           EMAIL_TO_FAILURE: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
@@ -87,6 +81,4 @@ jobs:
             --to "$EMAIL_TO_FAILURE" \
             --subject "Failure Notification" \
             --text "file:///tmp/email_body.txt" \
-            --region "$AWS_DEFAULT_REGION" \
-            --smtp-user "$SES_SMTP_USERNAME" \
-            --smtp-password "$SES_SMTP_PASSWORD"
+            --region "$AWS_DEFAULT_REGION"

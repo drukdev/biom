@@ -17,16 +17,15 @@ jobs:
         run: |
           docker -v
           cat /etc/os-release
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           aws configure set region ap-southeast-1
           aws s3 ls
 
       - name: Log in to ECR
-        run: 
+        run: |
           aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
-          
-      
+
       - name: Build and tag Docker image
         run: |
           docker build -t biometricservice .
@@ -34,10 +33,8 @@ jobs:
           echo 'docker images'
           docker images
 
-          
-       
       - name: Push Docker image to AWS ECR
-        run: 
+        run: |
           docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
 
       - name: SSH into EC2 instance and pull Docker image
@@ -55,9 +52,7 @@ jobs:
             docker pull 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
             cd /home/ubuntu/workspace/biometric-service
             sudo docker run -d -p 3001:3001 --name biometric-service --env-file .env 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
-			
-			
-	   
+
       - name: Notify on Success
         if: success()
         uses: actions/github-script@v4
@@ -74,7 +69,6 @@ jobs:
               });
             })
 
-    
       - name: Notify on Failure
         if: failure()
         uses: actions/github-script@v4

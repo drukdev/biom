@@ -57,17 +57,20 @@ jobs:
         if: success()
         uses: actions/github-script@v4
         with:
-          github-token: ${{ secrets.TOKEN }}
-          script: |
-            const recipients = '${{ secrets.EMAIL_RECIPIENTS }}'.split(/[;,]/);
-            recipients.forEach(email => {
-              github.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body: `CI/CD pipeline of Biometric succeeded! 🚀 Notifying ${email}`
-              });
-            })
+         github-token: ${{ secrets.TOKEN }}
+         script: |
+           const recipients = '${{ secrets.EMAIL_RECIPIENTS }}'.split(/[;,]/);
+           console.log('Recipients:', recipients); // Add this debug statement
+           recipients.forEach(email => {
+           console.log('Notifying:', email); // Add this debug statement
+           github.repos.createCommitComment({
+           owner: context.repo.owner,
+           repo: context.repo.repo,
+           commit_sha: context.sha,
+           body: `CI/CD pipeline of Biometric succeeded! 🚀 Notifying ${email}`
+           });
+           })
+
 
       - name: Notify on Failure
         if: failure()

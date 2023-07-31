@@ -53,37 +53,26 @@ jobs:
             cd /home/ubuntu/workspace/biometric-service
             sudo docker run -d -p 3001:3001 --name biometric-service --env-file .env 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
 
-      - name: Notify on Success
-        if: success()
-        uses: actions/github-script@v4
-        with:
-         github-token: ${{ secrets.TOKEN }}
-         script: |
-           const recipients = '${{ secrets.EMAIL_RECIPIENTS }}'.split(/[;,]/);
-           console.log('Recipients:', recipients); // Add this debug statement
-           recipients.forEach(email => {
-           console.log('Notifying:', email); // Add this debug statement
-           github.repos.createCommitComment({
-           owner: context.repo.owner,
-           repo: context.repo.repo,
-           commit_sha: context.sha,
-           body: `CI/CD pipeline of Biometric succeeded! 🚀 Notifying ${email}`
-           });
-           })
+      - name: Send Email Notification on Success
+        if: success() # Only runs when the job succeeds
+        env:
+          SES_SMTP_SERVER: ${{ secrets.SES_SMTP_SERVER }}
+          SES_SMTP_USERNAME: ${{ secrets.SES_SMTP_USERNAME }}
+          SES_SMTP_PASSWORD: ${{ secrets.SES_SMTP_PASSWORD }}
+          EMAIL_FROM: pooja.jagtap@ayanworks.com
+          EMAIL_TO_SUCCESS: ${{ secrets.EMAIL_RECIPIENTS }}
+        run: |
+          # Use the appropriate command for sending email via SES SMTP
+          echo "Your CI/CD pipeline succeeded!" | mailx -r $EMAIL_FROM -s "Success Notification" -S smtp="$SES_SMTP_SERVER" -S smtp-auth=login -S smtp-auth-user="$SES_SMTP_USERNAME" -S smtp-auth-password="$SES_SMTP_PASSWORD" $EMAIL_TO_SUCCESS
 
-
-      - name: Notify on Failure
-        if: failure()
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{ secrets.TOKEN }}
-          script: |
-            const recipients = '${{ secrets.EMAIL_RECIPIENTS }}'.split(/[;,]/);
-            recipients.forEach(email => {
-              github.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body: `CI/CD pipeline of Biometric failed! 😢 Notifying ${email}`
-              });
-            })
+      - name: Send Email Notification on Failure
+        if: failure() # Only runs when the job fails
+        env:
+          SES_SMTP_SERVER: ${{ secrets.SES_SMTP_SERVER }}
+          SES_SMTP_USERNAME: ${{ secrets.SES_SMTP_USERNAME }}
+          SES_SMTP_PASSWORD: ${{ secrets.SES_SMTP_PASSWORD }}
+          EMAIL_FROM: pooja.jagtap@ayanworks.com
+          EMAIL_TO_FAILURE: ${{ secrets.EMAIL_RECIPIENTS }}
+        run: |
+          # Use the appropriate command for sending email via SES SMTP
+          echo "Your CI/CD pipeline failed. Please check the logs." | mailx -r $EMAIL_FROM -s "Failure Notification" -S smtp="$SES_SMTP_SERVER" -S smtp-auth=login -S smtp-auth-user="$SES_SMTP_USERNAME" -S smtp-auth-password="$SES_SMTP_PASSWORD" $EMAIL_TO_FAILURE

@@ -56,23 +56,37 @@ jobs:
       - name: Send Email Notification on Success
         if: success() # Only runs when the job succeeds
         env:
-          SES_SMTP_SERVER: ${{ secrets.SES_SMTP_SERVER }}
+          AWS_DEFAULT_REGION: ap-southeast-1  # Change to your desired AWS region
           SES_SMTP_USERNAME: ${{ secrets.SES_SMTP_USERNAME }}
           SES_SMTP_PASSWORD: ${{ secrets.SES_SMTP_PASSWORD }}
           EMAIL_FROM: pooja.jagtap@ayanworks.com
           EMAIL_TO_SUCCESS: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
-          # Use the appropriate command for sending email via SES SMTP
-          echo "Your CI/CD pipeline succeeded!" | mailx -r $EMAIL_FROM -s "Success Notification" -S smtp="$SES_SMTP_SERVER" -S smtp-auth=login -S smtp-auth-user="$SES_SMTP_USERNAME" -S smtp-auth-password="$SES_SMTP_PASSWORD" $EMAIL_TO_SUCCESS
+          echo "Your CI/CD pipeline succeeded!" > /tmp/email_body.txt
+          aws ses send-email \
+            --from "$EMAIL_FROM" \
+            --to "$EMAIL_TO_SUCCESS" \
+            --subject "Success Notification" \
+            --text "file:///tmp/email_body.txt" \
+            --region "$AWS_DEFAULT_REGION" \
+            --smtp-user "$SES_SMTP_USERNAME" \
+            --smtp-password "$SES_SMTP_PASSWORD"
 
       - name: Send Email Notification on Failure
         if: failure() # Only runs when the job fails
         env:
-          SES_SMTP_SERVER: ${{ secrets.SES_SMTP_SERVER }}
+          AWS_DEFAULT_REGION: ap-southeast-1  # Change to your desired AWS region
           SES_SMTP_USERNAME: ${{ secrets.SES_SMTP_USERNAME }}
           SES_SMTP_PASSWORD: ${{ secrets.SES_SMTP_PASSWORD }}
           EMAIL_FROM: pooja.jagtap@ayanworks.com
           EMAIL_TO_FAILURE: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
-          # Use the appropriate command for sending email via SES SMTP
-          echo "Your CI/CD pipeline failed. Please check the logs." | mailx -r $EMAIL_FROM -s "Failure Notification" -S smtp="$SES_SMTP_SERVER" -S smtp-auth=login -S smtp-auth-user="$SES_SMTP_USERNAME" -S smtp-auth-password="$SES_SMTP_PASSWORD" $EMAIL_TO_FAILURE
+          echo "Your CI/CD pipeline failed. Please check the logs." > /tmp/email_body.txt
+          aws ses send-email \
+            --from "$EMAIL_FROM" \
+            --to "$EMAIL_TO_FAILURE" \
+            --subject "Failure Notification" \
+            --text "file:///tmp/email_body.txt" \
+            --region "$AWS_DEFAULT_REGION" \
+            --smtp-user "$SES_SMTP_USERNAME" \
+            --smtp-password "$SES_SMTP_PASSWORD"

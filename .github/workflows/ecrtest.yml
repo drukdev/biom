@@ -60,7 +60,7 @@ jobs:
           EMAIL_FROM: pooja.jagtap@ayanworks.com
           EMAIL_TO_SUCCESS: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
-          echo "Your CI/CD pipeline succeeded!" > /tmp/email_body.txt
+          echo "Your CI/CD pipeline on DEV Biometric succeeded!" > /tmp/email_body.txt
           aws ses send-email \
             --from "$EMAIL_FROM" \
             --to "$EMAIL_TO_SUCCESS" \
@@ -75,7 +75,7 @@ jobs:
           EMAIL_FROM: pooja.jagtap@ayanworks.com
           EMAIL_TO_FAILURE: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
-          echo "Your CI/CD pipeline failed. Please check the logs." > /tmp/email_body.txt
+          echo "Your CI/CD pipeline on DEV Biometric failed. Please check the logs." > /tmp/email_body.txt
           aws ses send-email \
             --from "$EMAIL_FROM" \
             --to "$EMAIL_TO_FAILURE" \

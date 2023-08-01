@@ -63,7 +63,7 @@ jobs:
           echo "Your CI/CD pipeline on DEV Biometric succeeded!" > /tmp/email_body.txt
           aws ses send-email \
             --from "$EMAIL_FROM" \
-            --to "$EMAIL_TO_SUCCESS" \
+            --to {ToAddresses:["$EMAIL_TO_SUCCESS"]} \
             --subject "Success Notification" \
             --text "file:///tmp/email_body.txt" \
             --region "$AWS_DEFAULT_REGION"
@@ -78,7 +78,7 @@ jobs:
           echo "Your CI/CD pipeline on DEV Biometric failed. Please check the logs." > /tmp/email_body.txt
           aws ses send-email \
             --from "$EMAIL_FROM" \
-            --to "$EMAIL_TO_FAILURE" \
+            --to {ToAddresses:["$EMAIL_TO_FAILURE"]} \
             --subject "Failure Notification" \
             --text "file:///tmp/email_body.txt" \
             --region "$AWS_DEFAULT_REGION"

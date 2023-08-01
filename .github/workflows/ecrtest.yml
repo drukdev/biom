@@ -58,7 +58,7 @@ jobs:
         env:
           AWS_DEFAULT_REGION: ap-southeast-1  # Change to your desired AWS region
           EMAIL_FROM: pooja.jagtap@ayanworks.com
-          EMAIL_TO_SUCCESS: ${{ secrets.EMAIL_RECIPIENTS }}
+          EMAIL_TO_SUCCESS: rohit.shitre@ayanworks.com
         run: |
           echo "Your CI/CD pipeline succeeded!" > /tmp/email_body.txt
           aws ses send-email \

@@ -63,9 +63,16 @@ jobs:
           EMAIL_FROM: pooja.jagtap@ayanworks.com
           EMAIL_TO_SUCCESS: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
+          echo "Email body content:"
           echo "Your CI/CD pipeline on DEV Biometric succeeded!" > /tmp/email_body.txt
+          cat /tmp/email_body.txt
+
+          echo "Email recipients:"
+          echo "$EMAIL_TO_SUCCESS"
+          
           IFS=',' read -ra EMAILS <<< "$EMAIL_TO_SUCCESS"
           for email in "${EMAILS[@]}"; do
+            echo "Sending email to: $email"
             aws ses send-email \
               --from "$EMAIL_FROM" \
               --to "$email" \

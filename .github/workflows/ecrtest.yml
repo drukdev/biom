@@ -28,7 +28,7 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t biometricservice .
+          docker build -t biometricservice 
           docker tag biometricservice:latest 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
           echo 'docker images'
           docker images

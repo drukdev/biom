@@ -64,12 +64,15 @@ jobs:
           EMAIL_TO_SUCCESS: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
           echo "Your CI/CD pipeline on DEV Biometric succeeded!" > /tmp/email_body.txt
-          aws ses send-email \
-            --from "$EMAIL_FROM" \
-            --to "$EMAIL_TO_SUCCESS" \
-            --subject "Success Notification" \
-            --text "file:///tmp/email_body.txt" \
-            --region "$AWS_DEFAULT_REGION"
+          IFS=',' read -ra EMAILS <<< "$EMAIL_TO_SUCCESS"
+          for email in "${EMAILS[@]}"; do
+            aws ses send-email \
+              --from "$EMAIL_FROM" \
+              --to "$email" \
+              --subject "Success Notification" \
+              --text "file:///tmp/email_body.txt" \
+              --region "$AWS_DEFAULT_REGION"
+          done
 
       - name: Send Email Notification on Failure
         if: failure() # Only runs when the job fails

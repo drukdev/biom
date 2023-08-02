@@ -72,7 +72,7 @@ jobs:
           
           IFS=',' read -ra EMAILS <<< "$EMAIL_TO_SUCCESS"
           for email in "${EMAILS[@]}"; do
-            email=$(echo $email | tr -d ' ')  # Remove any leading/trailing spaces
+            email=$(echo "$email" | tr -d ' ')  # Remove any leading/trailing spaces
             echo "Sending email to: $email"
             aws ses send-email \
               --from "$EMAIL_FROM" \

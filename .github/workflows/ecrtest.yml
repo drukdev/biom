@@ -53,12 +53,15 @@ jobs:
             cd /home/ubuntu/workspace/biometric-service
             sudo docker run -d -p 3001:3001 --name biometric-service --env-file .env 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
 
+
+
+
       - name: Send Email Notification on Success
         if: success() # Only runs when the job succeeds
         env:
           AWS_DEFAULT_REGION: ap-southeast-1  # Change to your desired AWS region
           EMAIL_FROM: pooja.jagtap@ayanworks.com
-          EMAIL_TO_SUCCESS: rohit.shitre@ayanworks.com, pooja.jagtap@ayanworks.com, vivek.injal@ayanworks.com
+          EMAIL_TO_SUCCESS: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
           echo "Your CI/CD pipeline on DEV Biometric succeeded!" > /tmp/email_body.txt
           aws ses send-email \
@@ -82,4 +85,3 @@ jobs:
             --subject "Failure Notification" \
             --text "file:///tmp/email_body.txt" \
             --region "$AWS_DEFAULT_REGION"
-

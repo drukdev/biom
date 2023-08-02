@@ -70,7 +70,7 @@ jobs:
               --from "$EMAIL_FROM" \
               --to "$email" \
               --subject "Success Notification" \
-              --text "file:///tmp/email_body.txt" \
+              --text "Your CI/CD pipeline on DEV Biometric succeeded!" \
               --region "$AWS_DEFAULT_REGION"
           done
 

@@ -90,10 +90,21 @@ jobs:
           EMAIL_FROM: pooja.jagtap@ayanworks.com
           EMAIL_TO_FAILURE: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
-          echo "Your CI/CD pipeline on DEV Biometric failed. Please check the logs." > /tmp/email_body.txt
-          aws ses send-email \
-            --from "$EMAIL_FROM" \
-            --to "$EMAIL_TO_FAILURE" \
-            --subject "Failure Notification" \
-            --text "file:///tmp/email_body.txt" \
-            --region "$AWS_DEFAULT_REGION"
+          echo "Email body content:"
+          echo "Your CI/CD pipeline on DEV Biometric failed!" > /tmp/email_body.txt
+          cat /tmp/email_body.txt
+
+          echo "Email recipients:"
+          echo "$EMAIL_TO_FAILURE"
+          
+          IFS=',' read -ra EMAILS <<< "$EMAIL_TO_FAILURE"
+          for email in "${EMAILS[@]}"; do
+            email=$(echo "$email" | tr -d ' ')  # Remove any leading/trailing spaces
+            echo "Sending email to: $email"
+            aws ses send-email \
+              --from "$EMAIL_FROM" \
+              --to "$email" \
+              --subject "Success Notification" \
+              --text "$(cat /tmp/email_body.txt)" \
+              --region "$AWS_DEFAULT_REGION"
+          done

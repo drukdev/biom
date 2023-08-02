@@ -70,9 +70,11 @@ jobs:
               --from "$EMAIL_FROM" \
               --to "$email" \
               --subject "Success Notification" \
-              --text "Your CI/CD pipeline on DEV Biometric succeeded!" \
+              --text "$(cat /tmp/email_body.txt)" \
               --region "$AWS_DEFAULT_REGION"
           done
+
+
 
       - name: Send Email Notification on Failure
         if: failure() # Only runs when the job fails

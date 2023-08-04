@@ -64,7 +64,9 @@ jobs:
           EMAIL_TO_SUCCESS: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
           echo "Email body content:"
-          echo "Your CI/CD pipeline on DEV Biometric succeeded!" > /tmp/email_body.txt
+          echo "Environment: DEV
+                Service: Biometric
+                Status: Succeeded!" > /tmp/email_body.txt
           cat /tmp/email_body.txt
 
           echo "Email recipients:"
@@ -91,7 +93,9 @@ jobs:
           EMAIL_TO_FAILURE: ${{ secrets.EMAIL_RECIPIENTS }}
         run: |
           echo "Email body content:"
-          echo "Your CI/CD pipeline on DEV Biometric failed!" > /tmp/email_body.txt
+          echo "Environment: DEV
+                Service: Biometric
+                Status: Failed!" > /tmp/email_body.txt
           cat /tmp/email_body.txt
 
           echo "Email recipients:"

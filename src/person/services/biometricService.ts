@@ -60,6 +60,14 @@ export class BiometricService {
         case '0204':
           personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}ashwini.jpeg`);
           break;
+        case '0205':
+        case '0208':
+          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}rinkal.png`);
+          break;
+        case '0207':
+        case '0210':
+          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}yogesh.png`);
+          break;
         default:
           personImg = await this.systemRepository
             .getCitizenImg(person)

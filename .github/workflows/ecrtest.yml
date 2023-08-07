@@ -51,6 +51,8 @@ jobs:
             sudo docker rmi 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
             docker pull 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
             cd /home/ubuntu/workspace/biometric-service
+            sudo docker stop latest || true
+            sudo docker rm -f latest || true 
             sudo docker run -d -p 3001:3001 --name biometric-service --env-file .env 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
             sudo docker rmi $(docker images -f "dangling=true" -q)
 

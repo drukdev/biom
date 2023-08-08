@@ -6,35 +6,46 @@ on:
       - qa-'*'
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
+      - name: Install dependencies
+        run: yarn
+      - name: Generate Prisma Client
+        run: yarn prisma:generate
+      - name: Build app
+        run: yarn build
+      - name: Prepare files
+        run: |
+          mkdir project
+          cp -r dist project/
+          cp package.json project/
+          cp Dockerfile project/
       - name: Configure AWS credentials
         run: |
           docker -v
           cat /etc/os-release
-          aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
-          aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws configure set region ap-southeast-1
           aws s3 ls
-
       - name: Log in to ECR
-        run: |
+        run: 
           aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
-
+          
+      
       - name: Build and tag Docker image
         run: |
           docker build -t qabiometricservice .
           docker tag qabiometricservice:latest 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/qabiometricservice:biolatest
           echo 'docker images'
           docker images
-
+          
+       
       - name: Push Docker image to AWS ECR
-        run: |
+        run: 
           docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/qabiometricservice:biolatest
 
       - name: SSH into EC2 instance and pull Docker image
@@ -42,7 +53,7 @@ jobs:
         with:
           host: ${{ secrets.QA_EC2_INSTANCE_IP }}
           username: ${{ secrets.QA_SSH_USERNAME }}
-          key: ${{ secrets.QA_PRIVATE_KEY }}
+          key: ${{ secrets.QA_SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.EC2_INSTANCE_PASSPHRASE }}
           script: |
             docker login -u AWS -p "$(aws ecr get-login-password --region ap-southeast-1)" 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
@@ -57,8 +68,6 @@ jobs:
             sudo docker rmi $(docker images -f "dangling=true" -q)
 
 
-
-
       - name: Send Email Notification on Success
         if: success() # Only runs when the job succeeds
         env:
@@ -68,7 +77,7 @@ jobs:
         run: |
           echo "Email body content:"
           echo "Environment: QA
-                Service: Biometric
+                Service: Biometric Service
                 Status: Succeeded!" > /tmp/email_body.txt
           cat /tmp/email_body.txt
 

@@ -60,7 +60,7 @@ export class PersonController {
 
   @UseInterceptors(LoggingInterceptor)
   @MessagePattern({
-    endpoint: `${ServiceConstants.NATS_ENDPOINT}/${ServiceConstants.COMPARE_BM}`
+    endpoint: `${ServiceConstants.NATS_ENDPOINT}/${ServiceConstants.BM_VALIDATE_USER}`
   })
   async compareBiometric(@Body() person: PersonDTO): Promise<ResponseType> {
     const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);

@@ -56,7 +56,8 @@ jobs:
             sudo docker stop biolatest || true
             sudo docker rm -f biolatest || true 
             sudo docker run -d -p 3001:3001 --name biolatest --env-file .env 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/qabiometricservice:biolatest
-            sudo docker rmi $(docker images -f "dangling=true" -q)
+            sudo docker images -f "dangling=true" -q | xargs -r sudo docker rmi
+
 
 
       - name: Send Email Notification on Success

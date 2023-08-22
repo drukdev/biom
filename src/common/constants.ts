@@ -23,5 +23,5 @@ export enum CommonConstants {
 
 export enum ServiceConstants {
   NATS_ENDPOINT = 'biometricService',
-  COMPARE_BM = 'compareBiometrics'
+  BM_VALIDATE_USER = 'validateUser'
 }

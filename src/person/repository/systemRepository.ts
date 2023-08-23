@@ -13,22 +13,22 @@ import { Person } from '@regulaforensics/facesdk-webclient';
 import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
 import { AsyncLocalStorage } from 'async_hooks';
+import { BiometricReq } from '../interface/person.interface';
 
 @Injectable()
 export class SystemRepository {
-  
   constructor(
     private readonly httpService: HttpService,
     private configService: ConfigService,
     private readonly als: AsyncLocalStorage<LoggerClsStore>,
     private readonly ndiLogger: NDILogger
-    ) {}
+  ) {}
 
-  async getCitizenImg(person: PersonDTO): Promise<string | undefined> {
+  async getCitizenImg(biometricReq: BiometricReq): Promise<string | undefined> {
     const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
     ndiLogger.log(`start to get Citizen Image`);
     try {
-      if (null != person.idNumber) {
+      if (null != biometricReq.idNumber) {
         // Get access token
         const ssoUrl: string = this.configService.get('STAGE_DIIT_SSO') || '';
         const payload = new AuthTokenRequest();
@@ -51,8 +51,8 @@ export class SystemRepository {
         if (null != tokenResponse || tokenResponse != undefined) {
           const fetchedPerson: PersonDTO | Person = await this.callSystemToGetPerson(
             tokenResponse.accessToken,
-            person.idNumber,
-            person.idType
+            biometricReq.idNumber,
+            biometricReq.idType
           );
           if (fetchedPerson == undefined || fetchedPerson['image'] == undefined || null == fetchedPerson['image']) {
             throw new HttpException(

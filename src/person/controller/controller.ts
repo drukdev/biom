@@ -12,6 +12,7 @@ import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
 import { AsyncLocalStorage } from 'async_hooks';
 import { LoggingInterceptor } from '../../logger/logging.interceptor';
+import { isEmpty } from 'class-validator';
 
 @Controller()
 @ApiBearerAuth()
@@ -69,7 +70,7 @@ export class PersonController {
 
     ndiLogger.log(`${(!person.isBhutanese && person.idType.includes(IdTypes.Citizenship))} || ${(!person.isBhutanese && [IdTypes.Passport, IdTypes.WorkPermit].includes(person.idType))}`);
 
-      if ('undefined' == typeof person.fullName || 'undefined' == typeof person.idNumber) {
+      if (isEmpty(person.fullName) || isEmpty(person.idNumber)) {
         if ((!person.isBhutanese && person.idType.includes(IdTypes.Citizenship)) && (!person.isBhutanese && [IdTypes.Passport, IdTypes.WorkPermit].includes(person.idType))) {
         ndiLogger.log('BAD REQUEST');
         const result: ResponseType = {

@@ -31,6 +31,8 @@ export class BiometricService {
       switch (person.idNumber) {
         case '0190':
         case '0191':
+        case '0215':
+        case '0216':
           personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}akshay.jpeg`);
           break;
         case '0194':
@@ -50,6 +52,8 @@ export class BiometricService {
           break;
         case '0199':
         case '0202':
+        case '0213':
+        case '0214':
           personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}ankita.jpg`);
           break;
         case '0203':
@@ -58,6 +62,8 @@ export class BiometricService {
           break;
         case '0201':
         case '0204':
+        case '0217':
+        case '0218':
           personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}ashwini.jpeg`);
           break;
         case '0205':
@@ -66,6 +72,8 @@ export class BiometricService {
           break;
         case '0207':
         case '0210':
+        case '0211':
+        case '0212':
           personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}yogesh.png`);
           break;
         default:

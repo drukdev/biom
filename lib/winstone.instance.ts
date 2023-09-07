@@ -8,20 +8,24 @@ if (!existsSync(logDir)) {
   mkdirSync(logDir);
 }
 
-const esTransportOpts = {
+let esTransport;
+if ('true' === process.env.ELK_LOG?.toLowerCase()) {
+  const esTransportOpts = {
   level: `${process.env.LOG_LEVEL}`,
   clientOpts: { node: `${process.env.ELK_LOG_PATH}`,
   auth: {
     username: `${process.env.ELK_USERNAME}`,
     password: `${process.env.ELK_PASSWORD}`
-  } 
-}
+  }
+ }
 };
-const esTransport = new ElasticsearchTransport(esTransportOpts);
+esTransport = new ElasticsearchTransport(esTransportOpts);
 
 esTransport.on('error', (error) => {
   console.error('Error caught in logger', error);
 });
+
+}
 
   const winstonLogger = winston.createLogger({
     format: ecsFormat({ convertReqRes: true }),

@@ -1,4 +1,4 @@
-name: Tag Workflow
+name: QA Tag Workflow
 
 on:
   create:

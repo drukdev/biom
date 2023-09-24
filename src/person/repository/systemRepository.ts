@@ -43,12 +43,12 @@ export class SystemRepository {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
         };
-        ndiLogger.error(`sso_url : ${ssoUrl}`);
         const tokenResponse: AuthTokenResponse = await lastValueFrom(
           this.httpService.post(ssoUrl, qs.stringify(payload), config).pipe(map((response) => response.data))
         ).then((data: AuthTokenResponse) => plainToInstance(AuthTokenResponse, data));
 
         if (null != tokenResponse || tokenResponse != undefined) {
+          ndiLogger.log(`before calling callSystemToGetPerson`);
           const fetchedPerson: PersonDTO | Person = await this.callSystemToGetPerson(
             tokenResponse.accessToken,
             biometricReq.idNumber,
@@ -87,6 +87,7 @@ export class SystemRepository {
     systemurl = `${systemurl}${idNumber}`;
     ndiLogger.log(`started calling system : url : ${systemurl}`);
     try {
+      ndiLogger.log(`systemurl is ${systemurl}`);
       const response: Person | PersonDTO = await lastValueFrom(
         this.httpService
           .get(systemurl, { headers: { Authorization: `Bearer ${token}` } })
@@ -94,7 +95,7 @@ export class SystemRepository {
       ).then((data: Person) => this.getData(data, idType));
       return response;
     } catch (error) {
-      ndiLogger.error(`ERROR in POST : ${JSON.stringify(error)}`);
+      ndiLogger.error(`ERROR in rest request : ${JSON.stringify(error)}`);
       if (error.toString().includes(CommonConstants.RESP_ERR_HTTP_INVALID_HEADER_VALUE)) {
         throw new HttpException(
           {
@@ -144,8 +145,11 @@ export class SystemRepository {
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
   getData(data: any, system: string): Person | PersonDTO {
-    let result: Person | PersonDTO =
+    let result: Person | PersonDTO;
+    if (system.match(IdTypes.Citizenship)) {
+      result =
       0 < Object.keys(data['citizenimages']).length ? data['citizenimages']['citizenimage'][0] : undefined;
+    }
     if (system.match(IdTypes.WorkPermit)) {
       result = 0 < Object.keys(data['ImmiImages']).length ? data['ImmiImages']['ImmiImage'][0] : undefined;
     }

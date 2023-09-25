@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { PersonDTO } from '../dto/person';
 import { ConfigService } from '@nestjs/config';
 
 import * as fs from 'fs';
@@ -12,6 +11,7 @@ import { CommonConstants } from '../../common/constants';
 import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
 import { ResponseType } from '../../common/response.interface';
+import { BiometricReq } from '../interface/person.interface';
 @Injectable()
 export class BiometricService {
   constructor(
@@ -21,14 +21,14 @@ export class BiometricService {
     private readonly als: AsyncLocalStorage<LoggerClsStore>,
     private readonly ndiLogger: NDILogger
   ) {}
-  public async compareImage(image: Buffer, person: PersonDTO): Promise<ResponseType> {
+  public async compareImage(image: Buffer, biometricReq: BiometricReq): Promise<ResponseType> {
     const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
     ndiLogger.log('Start to compare images');
     let personImg: ArrayBufferLike;
     const returnResult = {} as ResponseType;
     try {
       const PATH_TO_TEMP = `/src/person/services/temporaryUpload/`;
-      switch (person.idNumber) {
+      switch (biometricReq.idNumber) {
         case '0190':
         case '0191':
           personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}akshay.jpeg`);
@@ -70,7 +70,7 @@ export class BiometricService {
           break;
         default:
           personImg = await this.systemRepository
-            .getCitizenImg(person)
+            .getCitizenImg(biometricReq)
             .then((value: string) => Buffer.from(value, 'base64'));
       }
       // Start comparing image buffers

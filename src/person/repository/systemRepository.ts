@@ -13,22 +13,22 @@ import { Person } from '@regulaforensics/facesdk-webclient';
 import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
 import { AsyncLocalStorage } from 'async_hooks';
+import { BiometricReq } from '../interface/person.interface';
 
 @Injectable()
 export class SystemRepository {
-  
   constructor(
     private readonly httpService: HttpService,
     private configService: ConfigService,
     private readonly als: AsyncLocalStorage<LoggerClsStore>,
     private readonly ndiLogger: NDILogger
-    ) {}
+  ) {}
 
-  async getCitizenImg(person: PersonDTO): Promise<string | undefined> {
+  async getCitizenImg(biometricReq: BiometricReq): Promise<string | undefined> {
     const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
     ndiLogger.log(`start to get Citizen Image`);
     try {
-      if (null != person.idNumber) {
+      if (null != biometricReq.idNumber) {
         // Get access token
         const ssoUrl: string = this.configService.get('STAGE_DIIT_SSO') || '';
         const payload = new AuthTokenRequest();
@@ -43,16 +43,16 @@ export class SystemRepository {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
         };
-        ndiLogger.error(`sso_url : ${ssoUrl}`);
         const tokenResponse: AuthTokenResponse = await lastValueFrom(
           this.httpService.post(ssoUrl, qs.stringify(payload), config).pipe(map((response) => response.data))
         ).then((data: AuthTokenResponse) => plainToInstance(AuthTokenResponse, data));
 
         if (null != tokenResponse || tokenResponse != undefined) {
+          ndiLogger.log(`before calling callSystemToGetPerson`);
           const fetchedPerson: PersonDTO | Person = await this.callSystemToGetPerson(
             tokenResponse.accessToken,
-            person.idNumber,
-            person.idType
+            biometricReq.idNumber,
+            biometricReq.idType
           );
           if (fetchedPerson == undefined || fetchedPerson['image'] == undefined || null == fetchedPerson['image']) {
             throw new HttpException(
@@ -87,6 +87,7 @@ export class SystemRepository {
     systemurl = `${systemurl}${idNumber}`;
     ndiLogger.log(`started calling system : url : ${systemurl}`);
     try {
+      ndiLogger.log(`systemurl is ${systemurl}`);
       const response: Person | PersonDTO = await lastValueFrom(
         this.httpService
           .get(systemurl, { headers: { Authorization: `Bearer ${token}` } })
@@ -94,7 +95,7 @@ export class SystemRepository {
       ).then((data: Person) => this.getData(data, idType));
       return response;
     } catch (error) {
-      ndiLogger.error(`ERROR in POST : ${JSON.stringify(error)}`);
+      ndiLogger.error(`ERROR in rest request : ${JSON.stringify(error)}`);
       if (error.toString().includes(CommonConstants.RESP_ERR_HTTP_INVALID_HEADER_VALUE)) {
         throw new HttpException(
           {
@@ -144,8 +145,11 @@ export class SystemRepository {
 
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
   getData(data: any, system: string): Person | PersonDTO {
-    let result: Person | PersonDTO =
+    let result: Person | PersonDTO;
+    if (system.match(IdTypes.Citizenship)) {
+      result =
       0 < Object.keys(data['citizenimages']).length ? data['citizenimages']['citizenimage'][0] : undefined;
+    }
     if (system.match(IdTypes.WorkPermit)) {
       result = 0 < Object.keys(data['ImmiImages']).length ? data['ImmiImages']['ImmiImage'][0] : undefined;
     }

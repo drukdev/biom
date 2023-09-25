@@ -12,11 +12,11 @@
     "incremental": true,
     "strictNullChecks": false,
     "skipLibCheck": true,
-    // "paths": {
-    //   "@src/*": ["src/*"],
-    //   "@lib/*": ["lib/*"],
-    //   "@config/*": ["config/*"]
-    // }
+    "paths": {
+      "@src/*": ["src/*"],
+      "@lib/*": ["lib/*"],
+      "@config/*": ["config/*"]
+    }
     // "noUnusedLocals": true
   },
   "exclude": ["node_modules", "./dist/**/*"]

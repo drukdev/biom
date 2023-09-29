@@ -3,7 +3,7 @@ import { HttpModule } from '@nestjs/axios';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule } from '@nestjs/config';
-import { getNatsOptions } from '@src/common/functions';
+import { getNatsOptions } from './../common/functions';
 import { AlsModule } from '../AsyncLocalStorage/als.module';
 import NATSClientService from '../common/NATSClientService';
 import { LoggerModule } from '../logger/logger.module';

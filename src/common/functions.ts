@@ -1,5 +1,5 @@
 import { Authenticator, nkeyAuthenticator } from 'nats';
-import { NATSReconnects } from '@src/common/constants';
+import { NATSReconnects } from './constants';
 
 export const pagination = (
   pageSize: number,

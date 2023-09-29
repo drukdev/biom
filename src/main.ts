@@ -6,7 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import * as bodyParser from 'body-parser';
 import { NDILogger } from './logger/logger.service';
-import { getNatsOptions } from '@src/common/functions';
+import { getNatsOptions } from './common/functions';
 
 async function bootstrap(): Promise<void> {
   const logger = new NDILogger(`${process.env.SERVICE_NAME}`).setContext('Main Logger');

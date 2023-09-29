@@ -40,6 +40,7 @@ export class PersonController {
       const imgBuffer: Buffer = Buffer.from(biometricReq.image, 'base64');
       const result = await this.biometricService.compareImage(imgBuffer, biometricReq);
       ndiLogger.log(`result : ${JSON.stringify(result)}`);
+      ndiLogger.log(`compareBiometric ends`);
       return result;
     } catch (error) {
       throw new InternalServerErrorException(error.message);

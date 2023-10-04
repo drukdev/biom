@@ -5,8 +5,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import * as bodyParser from 'body-parser';
-import { nkeyAuthenticator } from 'nats';
 import { NDILogger } from './logger/logger.service';
+import { getNatsOptions } from './common/functions';
 
 async function bootstrap(): Promise<void> {
   const logger = new NDILogger(`${process.env.SERVICE_NAME}`).setContext('Main Logger');
@@ -17,12 +17,7 @@ async function bootstrap(): Promise<void> {
   app.setGlobalPrefix('biometric');
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.NATS,
-    options: {
-      servers: configService.get('NATS_URL'),
-      authenticator: nkeyAuthenticator(new TextEncoder().encode(
-        configService.get('NKEY_SEED')
-      ))
-    }
+    options: getNatsOptions()
   });
   app.useGlobalPipes(new ValidationPipe());
   app.use(bodyParser.json({ limit: '5mb' }));

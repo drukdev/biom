@@ -3,7 +3,7 @@ import { HttpModule } from '@nestjs/axios';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule } from '@nestjs/config';
-import { nkeyAuthenticator } from 'nats';
+import { getNatsOptions } from './../common/functions';
 import { AlsModule } from '../AsyncLocalStorage/als.module';
 import NATSClientService from '../common/NATSClientService';
 import { LoggerModule } from '../logger/logger.module';
@@ -20,10 +20,7 @@ import { BiometricService } from './services/biometricService';
       {
         name: 'NATS_CLIENT',
         transport: Transport.NATS,
-        options: {
-          servers: [`${process.env.NATS_URL}` as string],
-          authenticator: nkeyAuthenticator(new TextEncoder().encode(process.env.NKEY_SEED))
-        }
+        options: getNatsOptions()
       }
     ]),
     HttpModule,

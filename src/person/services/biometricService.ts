@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { PersonDTO } from '../dto/person';
 import { ConfigService } from '@nestjs/config';
 
 import * as fs from 'fs';
@@ -12,6 +11,7 @@ import { CommonConstants } from '../../common/constants';
 import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
 import { ResponseType } from '../../common/response.interface';
+import { BiometricReq } from '../interface/person.interface';
 @Injectable()
 export class BiometricService {
   constructor(
@@ -21,16 +21,18 @@ export class BiometricService {
     private readonly als: AsyncLocalStorage<LoggerClsStore>,
     private readonly ndiLogger: NDILogger
   ) {}
-  public async compareImage(image: Buffer, person: PersonDTO): Promise<ResponseType> {
+  public async compareImage(image: Buffer, biometricReq: BiometricReq): Promise<ResponseType> {
     const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
     ndiLogger.log('Start to compare images');
     let personImg: ArrayBufferLike;
     const returnResult = {} as ResponseType;
     try {
       const PATH_TO_TEMP = `/src/person/services/temporaryUpload/`;
-      switch (person.idNumber) {
+      switch (biometricReq.idNumber) {
         case '0190':
         case '0191':
+        case '0215':
+        case '0216':
           personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}akshay.jpeg`);
           break;
         case '0194':
@@ -50,6 +52,8 @@ export class BiometricService {
           break;
         case '0199':
         case '0202':
+        case '0213':
+        case '0214':
           personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}ankita.jpg`);
           break;
         case '0203':
@@ -58,6 +62,8 @@ export class BiometricService {
           break;
         case '0201':
         case '0204':
+        case '0217':
+        case '0218':
           personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}ashwini.jpeg`);
           break;
         case '0205':
@@ -66,11 +72,13 @@ export class BiometricService {
           break;
         case '0207':
         case '0210':
+        case '0211':
+        case '0212':
           personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}yogesh.png`);
           break;
         default:
           personImg = await this.systemRepository
-            .getCitizenImg(person)
+            .getCitizenImg(biometricReq)
             .then((value: string) => Buffer.from(value, 'base64'));
       }
       // Start comparing image buffers

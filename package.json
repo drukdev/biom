@@ -15,7 +15,7 @@
     "start": "nest start",
     "start:pm2": "NODE_ENV=development pm2 start dist/src/main.js --name biometric-service --update-env",
     "start:dev": "env-cmd -f .env nest start --watch",
-    "start:debug": "nest start --debug --watch",
+    "start:debug": "env-cmd -f .env nest start --debug --watch",
     "start:prod": "NODE_ENV=production node dist/main",
     "start:docker": "NATS_URL=nats://host.docker.internal:4222 yarn start",
     "docker:build": "docker build -t biometric-service .",

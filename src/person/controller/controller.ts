@@ -1,10 +1,10 @@
 import { Body, Controller, InternalServerErrorException, Post, UseGuards, UseInterceptors } from '@nestjs/common';
 import { BiometricService } from '../../person/services/biometricService';
-import { ServiceConstants } from '../../common/constants';
 import { MessagePattern } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { ResponseType } from '../../common/response.interface';
+import {  ServiceConstants } from '../../common/constants';
 import { IdTypes } from '../../common/IdTypes';
 import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';

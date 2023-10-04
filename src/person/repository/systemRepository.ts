@@ -54,7 +54,7 @@ export class SystemRepository {
             biometricReq.idNumber,
             biometricReq.idType
           );
-          if (fetchedPerson == undefined || fetchedPerson['image'] == undefined || null == fetchedPerson['image']) {
+          if (undefined == fetchedPerson || undefined == fetchedPerson['image'] || null == fetchedPerson['image']) {
             throw new HttpException(
               {
                 statusCode: HttpStatus.NOT_FOUND,
@@ -87,7 +87,6 @@ export class SystemRepository {
     systemurl = `${systemurl}${idNumber}`;
     ndiLogger.log(`started calling system : url : ${systemurl}`);
     try {
-      ndiLogger.log(`systemurl is ${systemurl}`);
       const response: Person | PersonDTO = await lastValueFrom(
         this.httpService
           .get(systemurl, { headers: { Authorization: `Bearer ${token}` } })

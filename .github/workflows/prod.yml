@@ -1,14 +1,14 @@
-name: Stage Tag Workflow
+name: prod Tag Workflow
 
 on:
   create:
     tags:
-      - stage-'*'
+      - prod-'*'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/stage-')
+    if: startsWith(github.ref, 'refs/tags/prod-')
 
     steps:
       - name: Checkout code
@@ -30,33 +30,33 @@ jobs:
       
       - name: Build and tag Docker image
         run: |
-          docker build -t stagebiometricservice .
-          docker tag stagebiometricservice:latest 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:biolatest
+          docker build -t prodbiometricservice .
+          docker tag prodbiometricservice:latest 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/prodbiometricservice:biolatest
           echo 'docker images'
           docker images
           
        
       - name: Push Docker image to AWS ECR
         run: 
-          docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:biolatest
+          docker push 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/prodbiometricservice:biolatest
 
       - name: SSH into EC2 instance and pull Docker image
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.STAGE_EC2_INSTANCE_IP }}
-          username: ${{ secrets.STAGE_SSH_USERNAME }}
-          key: ${{ secrets.STAGE_SSH_PRIVATE_KEY }}
+          host: ${{ secrets.PROD_EC2_INSTANCE_IP }}
+          username: ${{ secrets.PROD_SSH_USERNAME }}
+          key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.EC2_INSTANCE_PASSPHRASE }}
           script: |
             docker login -u AWS -p "$(aws ecr get-login-password --region ap-southeast-1)" 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
             sudo docker stop biolatest || true
             sudo docker rm -f biolatest || true
-            sudo docker rmi 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:biolatest
-            docker pull 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:biolatest
+            sudo docker rmi 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/prodbiometricservice:biolatest
+            docker pull 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/prodbiometricservice:biolatest
             cd /home/ubuntu/workspace/biometric-service
             sudo docker stop biolatest || true
             sudo docker rm -f biolatest || true 
-            sudo docker run -d -p 3001:3001 --name biolatest --env-file .env 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:biolatest
+            sudo docker run -d -p 3001:3001 --name biolatest --env-file .env 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com/prodbiometricservice:biolatest
             sudo docker images -f "dangling=true" -q | xargs -r sudo docker rmi
 
 

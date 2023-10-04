@@ -54,8 +54,7 @@ export default class ExceptionHandler implements ExceptionFilter {
     const responseBody : ResponseType = {
       statusCode: httpStatus,
       timestamp: new Date().toISOString(),
-      message,
-      error: exception
+      message
     };
 
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);

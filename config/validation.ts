@@ -24,5 +24,6 @@ export const validationSchema = Joi.object({
   CONSOLE_LOG: Joi.string().required(),
   LOG_LEVEL: Joi.string().required(),
   ELK_USERNAME: Joi.string().required(),
-  ELK_PASSWORD: Joi.string().required()
+  ELK_PASSWORD: Joi.string().required(),
+  ROYAL_IMG: Joi.string().required()
 });

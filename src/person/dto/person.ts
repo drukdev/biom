@@ -138,29 +138,4 @@ export class PersonDTO {
   lastNamebh: string;
   householdNo: number;
   firstissueDate: Date;
-
-  formRoyalUser(royalUser): void {
-    this.id = royalUser.id;
-    this.firstName = royalUser.First_Name;
-    this.middleName = royalUser.Middle_Name;
-    this.lastName = royalUser.Last_Name;
-    this.gender = royalUser.Gender;
-    // this.fatherName = undefined;
-    // this.mobileNumber = '';
-    // this.motherName = '';
-    // this.occupationDesc = '';
-    // this.dzongkhagSerialno= '';
-    // this.:gewogSerialno = '';
-    // this.permanentHouseno = '';
-    this.permanentThramno = royalUser.Present_Thram_No;
-    this.permanentVillageserialno = royalUser.Present_Village_Serial_No;
-    // this.permanentVillagename= '';
-    // this.palceOfbirth = '';
-    // this.countryName = '';
-    this.firstNamebh = royalUser.First_Name_Bh;
-    this.middleNamebh = royalUser.Middle_Name_Bh;
-    this.lastNamebh = royalUser.Last_Name_Bh;
-    this.householdNo = royalUser.Present_HouseHold_No;
-    this.firstissueDate = royalUser.Record_Date;
-  }
 }

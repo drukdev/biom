@@ -87,67 +87,87 @@ export class SystemRepository {
     systemurl = `${systemurl}${idNumber}`;
     ndiLogger.log(`started calling system : url : ${systemurl}`);
     try {
-      const response: Person | PersonDTO = await lastValueFrom(
-        this.httpService
-          .get(systemurl, { headers: { Authorization: `Bearer ${token}` } })
-          .pipe(map((response) => response.data))
-      ).then((data: Person) => this.getData(data, idType));
+      const response: Person | PersonDTO = await this.getUserImage(token, systemurl, idType);
+
       return response;
     } catch (error) {
+
+      if (IdTypes.Citizenship === idType && error.toString().includes(HttpStatus.INTERNAL_SERVER_ERROR)) {
+        try {
+          ndiLogger.log('Getting royal user data');
+          systemurl = `${this.configService.get('ROYAL_IMG')}${idNumber}`;
+          const response: Person | PersonDTO = await this.getUserImage(token, systemurl, idType);
+          return response;
+        } catch (err) {
+        ndiLogger.error(`ERROR in getting royal user image : ${JSON.stringify(error)}`);
+          this.checkError(err);
+        }
+      }
       ndiLogger.error(`ERROR in rest request : ${JSON.stringify(error)}`);
-      if (error.toString().includes(CommonConstants.RESP_ERR_HTTP_INVALID_HEADER_VALUE)) {
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.UNAUTHORIZED,
-            error: CommonConstants.UNAUTH_MSG
-          },
-          HttpStatus.UNAUTHORIZED
-        );
-      }
-      if (error.toString().includes(CommonConstants.RESP_ERR_NOT_FOUND)) {
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.NOT_FOUND,
-            error: error.message
-          },
-          HttpStatus.NOT_FOUND
-        );
-      }
-      if (error.toString().includes(CommonConstants.RESP_BAD_REQUEST)) {
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.BAD_REQUEST,
-            error: error.message
-          },
-          HttpStatus.BAD_REQUEST
-        );
-      }
-      if (error.toString().includes(CommonConstants.RESP_ERR_UNPROCESSABLE_ENTITY)) {
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-            error: error.message
-          },
-          HttpStatus.UNPROCESSABLE_ENTITY
-        );
-      } else {
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-            error: 'Something went wrong.'
-          },
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
+
+      this.checkError(error);
+    }
+    
+  }
+  checkError(error): void {
+    if (error.toString().includes(CommonConstants.RESP_ERR_HTTP_INVALID_HEADER_VALUE)) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.UNAUTHORIZED,
+          error: CommonConstants.UNAUTH_MSG
+        },
+        HttpStatus.UNAUTHORIZED
+      );
+    }
+    if (error.toString().includes(CommonConstants.RESP_ERR_NOT_FOUND)) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.NOT_FOUND,
+          error: error.message
+        },
+        HttpStatus.NOT_FOUND
+      );
+    }
+    if (error.toString().includes(CommonConstants.RESP_BAD_REQUEST)) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.BAD_REQUEST,
+          error: error.message
+        },
+        HttpStatus.BAD_REQUEST
+      );
+    }
+    if (error.toString().includes(CommonConstants.RESP_ERR_UNPROCESSABLE_ENTITY)) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+          error: error.message
+        },
+        HttpStatus.UNPROCESSABLE_ENTITY
+      );
+    } else {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Something went wrong.'
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
+  async getUserImage(token: string, systemurl: string, idType: IdTypes): Promise<Person | PersonDTO> {
+    return lastValueFrom(
+      this.httpService
+        .get(systemurl, { headers: { Authorization: `Bearer ${token}` } })
+        .pipe(map((response) => response.data))
+    ).then((data: Person) => this.getData(data, idType));
+  }
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
   getData(data: any, system: string): Person | PersonDTO {
     let result: Person | PersonDTO;
     if (system.match(IdTypes.Citizenship)) {
-      result =
-      0 < Object.keys(data['citizenimages']).length ? data['citizenimages']['citizenimage'][0] : undefined;
+      result = 0 < Object.keys(data['citizenimages']).length ? data['citizenimages']['citizenimage'][0] : undefined;
     }
     if (system.match(IdTypes.WorkPermit)) {
       result = 0 < Object.keys(data['ImmiImages']).length ? data['ImmiImages']['ImmiImage'][0] : undefined;

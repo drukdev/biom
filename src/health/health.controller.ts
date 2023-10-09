@@ -27,7 +27,7 @@ export class HealthController {
       async (): Promise<HealthIndicatorResult> => this.microservice.pingCheck('NATS-server', {
           transport: Transport.NATS,
           options: {
-            servers: [`${process.env.NATS_URL}`],
+            servers: `${process.env.NATS_URL}`.split(','),
             authenticator: nkeyAuthenticator(new TextEncoder().encode(
               this.configService.get('NKEY_SEED')
             ))

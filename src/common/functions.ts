@@ -39,7 +39,7 @@ export const getNatsOptions = (): {
   maxReconnectAttempts: NATSReconnects;
   reconnectTimeWait: NATSReconnects;
 } => ({
-    servers: [`${process.env.NATS_URL}` as string],
+    servers: `${process.env.NATS_URL}`.split(','),
     authenticator: nkeyAuthenticator(new TextEncoder().encode(process.env.NKEY_SEED)),
     maxReconnectAttempts: NATSReconnects.maxReconnectAttempts,
     reconnectTimeWait: NATSReconnects.reconnectTimeWait

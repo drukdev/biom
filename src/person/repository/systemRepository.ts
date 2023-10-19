@@ -113,7 +113,7 @@ export class SystemRepository {
             const response: Person | PersonDTO = await this.getUserImage(token, systemUrl, idType);
             return response;
           } catch (err) {
-            ndiLogger.error(`ERROR in getting royal user image : ${JSON.stringify(error)}`);
+            ndiLogger.error(`ERROR in getting royal user image : ${JSON.stringify(error.stack ? error.stack : error)}`);
             this.checkError(err);
           }
         }

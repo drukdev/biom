@@ -48,12 +48,24 @@ export class SystemRepository {
 
         if (null != tokenResponse || tokenResponse != undefined) {
           ndiLogger.log(`before calling callSystemToGetPerson`);
-          const fetchedPerson: PersonDTO | Person = await this.callSystemToGetPerson(
-            tokenResponse.accessToken,
-            biometricReq.idNumber,
-            biometricReq.idType
-          );
-          if (undefined == fetchedPerson || undefined == fetchedPerson['image'] || null == fetchedPerson['image']) {
+          let fetchedPerson: PersonDTO | Person;
+          try {
+            fetchedPerson = await this.callSystemToGetPerson(
+              tokenResponse.accessToken,
+              biometricReq.idNumber,
+              biometricReq.idType
+            );
+          } catch (error) {
+            ndiLogger.error(error);
+            fetchedPerson = undefined;
+          }
+
+          if (
+            undefined == fetchedPerson ||
+            undefined == fetchedPerson['image'] ||
+            null == fetchedPerson['image'] ||
+            '' == fetchedPerson['image']
+          ) {
             throw new HttpException(
               {
                 statusCode: HttpStatus.NOT_FOUND,
@@ -68,6 +80,7 @@ export class SystemRepository {
       }
     } catch (err) {
       ndiLogger.error(err);
+      throw err;
     }
   }
 
@@ -113,7 +126,7 @@ export class SystemRepository {
             const response: Person | PersonDTO = await this.getUserImage(token, systemUrl, idType);
             return response;
           } catch (err) {
-            ndiLogger.error(`ERROR in getting royal user image : ${JSON.stringify(error)}`);
+            ndiLogger.error(`ERROR in getting royal user image : ${JSON.stringify(error.stack ? error.stack : error)}`);
             this.checkError(err);
           }
         }
@@ -182,7 +195,11 @@ export class SystemRepository {
     let result: Person | PersonDTO;
     if (system.match(IdTypes.Citizenship)) {
       if (data['ndicitizenimages']) {
-        if (0 < Object.keys(data['ndicitizenimages']).length && data['ndicitizenimages']['ndicitizenimage'] && data['ndicitizenimages']['ndicitizenimage'][0]) {
+        if (
+          0 < Object.keys(data['ndicitizenimages']).length &&
+          data['ndicitizenimages']['ndicitizenimage'] &&
+          data['ndicitizenimages']['ndicitizenimage'][0]
+        ) {
           // eslint-disable-next-line prefer-destructuring
           result = data['ndicitizenimages']['ndicitizenimage'][0];
         } else {

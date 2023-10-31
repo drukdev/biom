@@ -105,8 +105,8 @@ export class BiometricService {
       }
     } catch (error) {
       ndiLogger.error(`error in biometric : ${error}`);
-      returnResult.statusCode = CommonConstants.RESP_ERR_500;
-      returnResult.error = CommonConstants.SERVER_ERROR;
+      returnResult.statusCode = error.response.statusCode ? error.response.statusCode : CommonConstants.RESP_ERR_500;
+      returnResult.error = error.response.error ? error.response.error : CommonConstants.SERVER_ERROR;
     }
     return returnResult;
   }

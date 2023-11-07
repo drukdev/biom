@@ -1,17 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import * as fs from 'fs';
-
 import { AsyncLocalStorage } from 'async_hooks';
 
 import { BiometricRepository } from '../repository/biometricsRepository';
 import { SystemRepository } from '../repository/systemRepository';
-import { CommonConstants } from '../../common/constants';
+import { AWS_S3_DIRECTORY, CommonConstants } from '../../common/constants';
 import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
 import { ResponseType } from '../../common/response.interface';
 import { BiometricReq } from '../interface/person.interface';
+import { S3Service } from 'src/aws-s3/s3.service';
 @Injectable()
 export class BiometricService {
   constructor(
@@ -19,69 +18,31 @@ export class BiometricService {
     private readonly biometricRepo: BiometricRepository,
     private readonly systemRepository: SystemRepository,
     private readonly als: AsyncLocalStorage<LoggerClsStore>,
-    private readonly ndiLogger: NDILogger
+    private readonly ndiLogger: NDILogger,
+    private readonly s3Service: S3Service
   ) {}
   public async compareImage(image: Buffer, biometricReq: BiometricReq): Promise<ResponseType> {
     const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
     ndiLogger.log('Start to compare images');
     let personImg: ArrayBufferLike;
     const returnResult = {} as ResponseType;
+
     try {
-      const PATH_TO_TEMP = `/src/person/services/temporaryUpload/`;
-      switch (biometricReq.idNumber) {
-        case '0190':
-        case '0191':
-        case '0215':
-        case '0216':
-          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}akshay.jpeg`);
-          break;
-        case '0194':
-        case '0195':
-          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}makrand.jpeg`);
-          break;
-        case '0192':
-        case '0193':
-          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}vivek.jpeg`);
-          break;
-        case 'E4089670':
-          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}jacques.png`);
-          break;
-        case '0197':
-        case '0198':
-          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}Sai.jpeg`);
-          break;
-        case '0199':
-        case '0202':
-        case '0213':
-        case '0214':
-          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}ankita.jpg`);
-          break;
-        case '0203':
-        case '0206':
-          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}rakesh.jpeg`);
-          break;
-        case '0201':
-        case '0204':
-        case '0217':
-        case '0218':
-          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}ashwini.jpeg`);
-          break;
-        case '0205':
-        case '0208':
-          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}rinkal.png`);
-          break;
-        case '0207':
-        case '0210':
-        case '0211':
-        case '0212':
-          personImg = this.getPersonImgBuffer(`${process.env.PWD}${PATH_TO_TEMP}yogesh.png`);
-          break;
-        default:
-          personImg = await this.systemRepository
-            .getCitizenImg(biometricReq)
-            .then((value: string) => Buffer.from(value, 'base64'));
-      }
-      // Start comparing image buffers
+        ndiLogger.log('Getting Test user image');
+        const bucketName = this.configService.get('USERS_TEST_DATA_BUCKET');
+        const fetchImage = await this.s3Service.getObjectFromDirectory(
+          bucketName,
+          `${AWS_S3_DIRECTORY.Image}/${AWS_S3_DIRECTORY.WorkPermit}`,
+          `${biometricReq.idNumber}.txt`
+        );
+        if (fetchImage) {
+          personImg = Buffer.from(fetchImage, 'base64');
+        } else {
+        ndiLogger.log(`Getting user's image`);
+        personImg = await this.systemRepository
+          .getCitizenImg(biometricReq)
+          .then((value: string) => Buffer.from(value, 'base64'));
+        }
       const compatibility: number =
         (await this.biometricRepo.compareImage(image, personImg).then((value) => {
           if (value != undefined) {
@@ -111,7 +72,5 @@ export class BiometricService {
     return returnResult;
   }
 
-  getPersonImgBuffer(path: string | Buffer | URL): ArrayBufferLike {
-    return fs.readFileSync(path).buffer;
-  }
+  
 }

@@ -10,7 +10,7 @@ import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
 import { ResponseType } from '../../common/response.interface';
 import { BiometricReq } from '../interface/person.interface';
-import { S3Service } from 'src/aws-s3/s3.service';
+import { S3Service } from '../../aws-s3/s3.service';
 @Injectable()
 export class BiometricService {
   constructor(

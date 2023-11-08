@@ -11,7 +11,7 @@ import { PersonController } from './controller/controller';
 import { BiometricRepository } from './repository/biometricsRepository';
 import { SystemRepository } from './repository/systemRepository';
 import { BiometricService } from './services/biometricService';
-import { S3Service } from 'src/aws-s3/s3.service';
+import { S3Service } from '../aws-s3/s3.service';
 
 
 @Module({

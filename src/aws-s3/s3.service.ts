@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
-import { AWS_S3_ERROR } from 'src/common/constants';
+import { AWS_S3_ERROR } from '../common/constants';
 
 @Injectable()
 export class S3Service {

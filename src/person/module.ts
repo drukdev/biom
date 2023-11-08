@@ -11,6 +11,7 @@ import { PersonController } from './controller/controller';
 import { BiometricRepository } from './repository/biometricsRepository';
 import { SystemRepository } from './repository/systemRepository';
 import { BiometricService } from './services/biometricService';
+import { S3Service } from 'src/aws-s3/s3.service';
 
 
 @Module({
@@ -29,6 +30,6 @@ import { BiometricService } from './services/biometricService';
     LoggerModule
   ],
   controllers: [PersonController],
-  providers: [BiometricService, NATSClientService, BiometricRepository, SystemRepository]
+  providers: [BiometricService, NATSClientService, BiometricRepository, SystemRepository, S3Service]
 })
 export class PersonModule {}

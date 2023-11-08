@@ -13,6 +13,7 @@ import { NDILogger } from './logger/logger.service';
 import { LoggerClsStore } from './logger/logger.store';
 import { PersonModule } from './person/module';
 import ExceptionHandler from './common/exception.handler';
+import { S3Module } from './aws-s3/s3.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import ExceptionHandler from './common/exception.handler';
     PersonModule,
     AuthModule,
     AlsModule,
-    LoggerModule
+    LoggerModule,
+    S3Module
   ],
   controllers: [HealthController],
   providers: [

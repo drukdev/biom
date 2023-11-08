@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { AsyncLocalStorage } from 'async_hooks';
@@ -11,6 +11,7 @@ import { LoggerClsStore } from '../../logger/logger.store';
 import { ResponseType } from '../../common/response.interface';
 import { BiometricReq } from '../interface/person.interface';
 import { S3Service } from '../../aws-s3/s3.service';
+import { IdTypes } from 'src/common/IdTypes';
 @Injectable()
 export class BiometricService {
   constructor(
@@ -28,21 +29,35 @@ export class BiometricService {
     const returnResult = {} as ResponseType;
 
     try {
-        ndiLogger.log('Getting Test user image');
-        const bucketName = this.configService.get('USERS_TEST_DATA_BUCKET');
-        const fetchImage = await this.s3Service.getObjectFromDirectory(
-          bucketName,
-          `${AWS_S3_DIRECTORY.Image}/${AWS_S3_DIRECTORY.WorkPermit}`,
-          `${biometricReq.idNumber}.txt`
-        );
-        if (fetchImage) {
-          personImg = Buffer.from(fetchImage, 'base64');
-        } else {
+      ndiLogger.log('Getting Test user image');
+      const bucketName = this.configService.get('USERS_TEST_DATA_BUCKET');
+      let directory: string;
+      switch (biometricReq.idType) {
+        case IdTypes.Citizenship:
+          directory = `${AWS_S3_DIRECTORY.Image}/${AWS_S3_DIRECTORY.Citizenship}`;
+          break;
+        case IdTypes.WorkPermit:
+          directory = `${AWS_S3_DIRECTORY.Image}/${AWS_S3_DIRECTORY.WorkPermit}`;
+          break;
+        case IdTypes.Passport:
+          directory = `${AWS_S3_DIRECTORY.Image}/${AWS_S3_DIRECTORY.Passport}`;
+          break;
+        default:
+          throw new HttpException('Invalid Id Type', HttpStatus.BAD_REQUEST);
+      }
+      const fetchImage = await this.s3Service.getObjectFromDirectory(
+        bucketName,
+        directory,
+        `${biometricReq.idNumber}.txt`
+      );
+      if (fetchImage) {
+        personImg = Buffer.from(fetchImage, 'base64');
+      } else {
         ndiLogger.log(`Getting user's image`);
         personImg = await this.systemRepository
           .getCitizenImg(biometricReq)
           .then((value: string) => Buffer.from(value, 'base64'));
-        }
+      }
       const compatibility: number =
         (await this.biometricRepo.compareImage(image, personImg).then((value) => {
           if (value != undefined) {
@@ -71,6 +86,4 @@ export class BiometricService {
     }
     return returnResult;
   }
-
-  
 }

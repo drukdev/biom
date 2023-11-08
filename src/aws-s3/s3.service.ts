@@ -20,12 +20,13 @@ export class S3Service {
   async getObjectFromDirectory(bucketName: string, directory: string, fileName: string): Promise<string | null> {
     const key = directory ? `${directory}/${fileName}` : fileName;
     
-    const params = {
+    // Paras to create command to get object from aws S3 bucket
+    const getObjectParams = {
       Bucket: bucketName,
       Key: key
     };
-
-    const command = new GetObjectCommand(params);
+    // command to get object from aws s3 
+    const command = new GetObjectCommand(getObjectParams);
 
     try {
       const response = await this.s3Client.send(command);

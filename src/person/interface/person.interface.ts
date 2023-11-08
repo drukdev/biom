@@ -1,4 +1,4 @@
-import { IdTypes } from 'src/common/IdTypes';
+import { IdTypes } from '../../common/IdTypes';
 
 export interface BiometricReq {
   idNumber: string;

@@ -11,7 +11,7 @@ import { LoggerClsStore } from '../../logger/logger.store';
 import { ResponseType } from '../../common/response.interface';
 import { BiometricReq } from '../interface/person.interface';
 import { S3Service } from '../../aws-s3/s3.service';
-import { IdTypes } from 'src/common/IdTypes';
+import { IdTypes } from '../../common/IdTypes';
 @Injectable()
 export class BiometricService {
   constructor(

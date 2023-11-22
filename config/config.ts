@@ -10,5 +10,6 @@ export const config = () => ({
   nats: {
     url: process.env.NATS_URL,
     NKEY_SEED: process.env.NKEY_SEED
-  }
+  },
+  ENABLE_CORS_IP_LIST: process.env.ENABLE_CORS_IP_LIST
 });

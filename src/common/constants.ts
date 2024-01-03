@@ -41,3 +41,5 @@ export enum AWS_S3_DIRECTORY {
 export enum AWS_S3_ERROR {
   NO_SUCH_KEY = 'NoSuchKey'
 }
+
+export const allowedHTTPMethods = ['GET', 'POST'];

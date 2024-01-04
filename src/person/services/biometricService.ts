@@ -51,9 +51,10 @@ export class BiometricService {
         `${biometricReq.idNumber}.txt`
       );
       if (fetchImage) {
+        ndiLogger.log(`Biometric-service-report-log-test-user-image`);
         personImg = Buffer.from(fetchImage, 'base64');
       } else {
-        ndiLogger.log(`Getting user's image`);
+        ndiLogger.log(`Biometric-service-report-log-real-user-image`);
         personImg = await this.systemRepository
           .getCitizenImg(biometricReq)
           .then((value: string) => Buffer.from(value, 'base64'));
@@ -70,13 +71,14 @@ export class BiometricService {
         returnResult.error = 'Invalid Biometric';
       } else {
         const result: boolean = compatibility > this.configService.get('THRESHOLD');
+        ndiLogger.log(`Biometric-service-report-log-compatibility-match-${result}`);
         ndiLogger.debug(`result of comparision : ${JSON.stringify(result)}`);
         returnResult.statusCode = CommonConstants.RESP_SUCCESS_200;
         returnResult.message = 'success';
         if (!result) {
           returnResult.statusCode = CommonConstants.RESP_BAD_REQUEST;
           returnResult.error = 'Invalid Biometric';
-        }
+        } 
         returnResult.data = { compatibility };
       }
     } catch (error) {

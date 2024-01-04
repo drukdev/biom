@@ -7,6 +7,7 @@ import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import * as bodyParser from 'body-parser';
 import { NDILogger } from './logger/logger.service';
 import { getNatsOptions } from './common/functions';
+import helmet from 'helmet';
 
 async function bootstrap(): Promise<void> {
   const logger = new NDILogger(`${process.env.SERVICE_NAME}`).setContext('Main Logger');
@@ -19,9 +20,22 @@ async function bootstrap(): Promise<void> {
     transport: Transport.NATS,
     options: getNatsOptions()
   });
-  app.useGlobalPipes(new ValidationPipe());
+   app.use(helmet());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true
+    })
+  );
   app.use(bodyParser.json({ limit: '5mb' }));
 
+  const ENABLE_CORS_IP_LIST = configService.get('ENABLE_CORS_IP_LIST');
+  if (ENABLE_CORS_IP_LIST && '' !== ENABLE_CORS_IP_LIST) {
+    app.enableCors({
+      origin: ENABLE_CORS_IP_LIST.split(','),
+      methods: 'GET,HEAD,PUT,PATCH,POST',
+      credentials: true
+    });
+  }
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: ['1'] // Global default version to show on Swagger

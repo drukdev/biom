@@ -54,7 +54,7 @@ export class PersonController {
   async compareBiometric(@Body() biometricReq: BiometricReq): Promise<ResponseType> {
     const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
     try {
-      ndiLogger.log(`compareBiometric starts`);
+      ndiLogger.log(`Biometric-service-report-log-compare-biometric-request-started`);
 
       ndiLogger.log(
         `${biometricReq.idType.includes(IdTypes.Citizenship)} || ${[IdTypes.Passport, IdTypes.WorkPermit].includes(

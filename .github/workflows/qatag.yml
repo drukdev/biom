@@ -73,7 +73,7 @@ jobs:
             sudo docker stop biolatest || true
             sudo docker rm -f biolatest || true 
             sudo docker run -d -p 3001:3001 --name biolatest --env-file .env ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/qabiometricservice:biolatest
-            o docker images -f "dangling=true" -q | xargs -r sudo docker rmi || echo 'No dangling images to remove'
+            sudo ocker images -f "dangling=true" -q | xargs -r sudo docker rmi || echo 'No dangling images to remove'
 
       -  name: Revoke runner IP address
          run: |

@@ -1,7 +1,7 @@
 name: Stage Tag Workflow
 
 on:
-  create:
+  push:
     tags:
       - 'stage*'
 

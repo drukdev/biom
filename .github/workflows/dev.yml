@@ -61,13 +61,14 @@ jobs:
           passphrase: ${{ secrets.EC2_INSTANCE_PASSPHRASE }}
           script: |
             docker login -u AWS -p "$(aws ecr get-login-password --region ap-southeast-1)" ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com
-            sudo docker stop biometric-service || true
-            sudo docker rm -f biometric-service || true
-            sudo docker rmi ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
+            docker stop biometric-service || true
+            docker rm -f biometric-service || true
+            docker rmi ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
             cd /home/${{ secrets.DEV_SSH_USERNAME }}/workspace/biometric-service
-            sudo docker run -d -p 3001:3001 --name biometric-service --env-file .env ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
-            sudo docker images -f "dangling=true" -q | xargs -r sudo docker rmi || echo 'No dangling images to remove'
+            docker run -d -p 3001:3001 --name biometric-service --env-file .env ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
+            docker images -f "dangling=true" -q | xargs -r sudo docker rmi || echo 'No dangling images to remove'
+     
       - name: revoke runner ip address
         if: always()
         run: |

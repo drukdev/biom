@@ -1,5 +1,5 @@
 import { APP_FILTER } from '@nestjs/core';
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { HttpException, HttpStatus, MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TerminusModule } from '@nestjs/terminus';
 import { AsyncLocalStorage } from 'async_hooks';
@@ -14,6 +14,7 @@ import { LoggerClsStore } from './logger/logger.store';
 import { PersonModule } from './person/module';
 import ExceptionHandler from './common/exception.handler';
 import { S3Module } from './aws-s3/s3.module';
+import { allowedHTTPMethods } from './common/constants';
 
 @Module({
   imports: [
@@ -48,6 +49,10 @@ export class AppModule {
     // bind the middleware,
     consumer
       .apply((req, res, next) => {
+
+        if (!allowedHTTPMethods.includes(req.method)) {
+          throw new HttpException('Method Not Allowed', HttpStatus.METHOD_NOT_ALLOWED); // Return 405 Method Not Allowed for disallowed methods
+        }
         // populate the store with some default values
         // based on the request,
         const store = {

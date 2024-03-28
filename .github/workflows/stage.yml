@@ -1,14 +1,14 @@
-name: QA Tag Workflow
+name: Stage Tag Workflow
 
 on:
   push:
     tags:
-      - 'qa*'
+      - 'stage*'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/qa-')
+    
 
     steps:
       - name: Checkout code
@@ -16,12 +16,11 @@ jobs:
 
       - name: Configure AWS credentials
         run: |
-          docker -v
-          cat /etc/os-release
+          
           aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
           aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           aws configure set region ap-southeast-1
-
+          
       - name: Get runner IP address
         id: ip
         uses: haythem/public-ip@v1.2
@@ -38,40 +37,42 @@ jobs:
          --protocol tcp \
          --port 22 \
          --cidr ${{ steps.ip.outputs.ipv4 }}/32 
-
+      
       - name: Log in to ECR
         run: |
-          aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 589943763826.dkr.ecr.ap-southeast-1.amazonaws.com
-          
+          aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com
+
       
       - name: Build and tag Docker image
         run: |
-          docker build -t qabiometricservice .
-          docker tag qabiometricservice:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/qabiometricservice:biolatest
-          echo 'docker images'
-          docker images
+          docker build -t stagebiometricservice .
+          docker tag stagebiometricservice:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:biolatest
           
        
       - name: Push Docker image to AWS ECR
         run: 
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/qabiometricservice:biolatest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:biolatest
 
       - name: SSH into EC2 instance and pull Docker image
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.QA_EC2_INSTANCE_IP }}
-          username: ${{ secrets.QA_SSH_USERNAME }}
-          key: ${{ secrets.QA_SSH_PRIVATE_KEY }}
+          host: ${{ secrets.STAGE_EC2_INSTANCE_IP }}
+          username: ${{ secrets.STAGE_SSH_USERNAME }}
+          key: ${{ secrets.STAGE_SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.EC2_INSTANCE_PASSPHRASE }}
           script: |
             docker login -u AWS -p "$(aws ecr get-login-password --region ap-southeast-1)" ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com
-            docker stop biolatest || true
-            docker rm -f biolatest || true
-            docker rmi ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/qabiometricservice:biolatest
-            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/qabiometricservice:biolatest
-            cd /home/${{ secrets.DEV_SSH_USERNAME }}/workspace/biometric-service           
-            docker run -d -p 3001:3001 --name biolatest --env-file .env ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/qabiometricservice:biolatest
-            
+            sudo docker stop biolatest || true
+            sudo docker rm -f biolatest || true
+            sudo docker rmi ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:biolatest
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:biolatest
+            cd /home/ubuntu/workspace/biometric-service
+            sudo docker stop biolatest || true
+            sudo docker rm -f biolatest || true
+            sudo docker-compose -f /home/ubuntu/workspace/biometric-service/docker-compose.yml up -d
+            sudo docker images -f "dangling=true" -q | xargs -r sudo docker rmi
+
+
       -  name: Revoke runner IP address
          run: |
           aws ec2 revoke-security-group-ingress \
@@ -79,5 +80,3 @@ jobs:
             --protocol tcp \
             --port 22 \
             --cidr ${{ steps.ip.outputs.ipv4 }}/32
-
-    

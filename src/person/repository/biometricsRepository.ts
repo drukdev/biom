@@ -37,7 +37,7 @@ export class BiometricRepository {
     ndiLogger.log('-----------------------------------------------------------------');
     ndiLogger.log('                         Compare Results                         ');
     ndiLogger.log('-----------------------------------------------------------------');
-    ndiLogger.log(`result from third party service : ${JSON.stringify(matchingResponse.results)}`);
+    ndiLogger.log(`result from third party service`);
     return matchingResponse.results.map((res: { similarity: number }) => res.similarity);
   }
 }

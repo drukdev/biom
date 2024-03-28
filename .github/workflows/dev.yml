@@ -1,0 +1,83 @@
+name: DEV Workflow
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        run: |
+          
+          aws configure set aws_access_key_id "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          aws configure set aws_secret_access_key "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          aws configure set region ap-southeast-1
+          
+          
+      - name: Get runner IP address
+        id: ip
+        uses: haythem/public-ip@v1.2
+
+      - name: Print Runner IP Address
+        id: print-ip
+        run: |
+         echo "Runner IP Address: ${{ steps.ip.outputs.ipv4 }}"
+         
+      - name: Whitelist runner IP address
+        run: |
+         aws ec2 authorize-security-group-ingress \
+         --group-id ${{ secrets.DEV_INSTANCE_SG_ID }} \
+         --protocol tcp \
+         --port 22 \
+         --cidr ${{ steps.ip.outputs.ipv4 }}/32 
+      
+      - name: Log in to ECR
+        run: |
+          aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com
+
+      - name: Build and tag Docker image
+        run: |
+          docker build -t biometricservice .
+          docker tag biometricservice:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
+          docker images
+
+      - name: Push Docker image to AWS ECR
+        run: |
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
+
+      - name: SSH into EC2 instance and pull Docker image
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_EC2_INSTANCE_IP }}
+          username: ${{ secrets.DEV_SSH_USERNAME }}
+          key: ${{ secrets.EC2_ECR_PRIVATE_KEY }}
+          passphrase: ${{ secrets.EC2_INSTANCE_PASSPHRASE }}
+          script: |
+            docker login -u AWS -p "$(aws ecr get-login-password --region ap-southeast-1)" ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com
+            docker stop biometric-service || true
+            docker rm -f biometric-service || true
+            docker rmi ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
+            cd /home/${{ secrets.DEV_SSH_USERNAME }}/workspace/biometric-service
+            docker run -d -p 3001:3001 --name biometric-service --env-file .env ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/biometricservice:latest
+            docker images -f "dangling=true" -q | xargs -r sudo docker rmi || echo 'No dangling images to remove'
+     
+      - name: revoke runner ip address
+        if: always()
+        run: |
+          aws ec2 revoke-security-group-ingress \
+          --group-id ${{ secrets.DEV_INSTANCE_SG_ID }} \
+          --protocol tcp \
+          --port 22 \
+          --cidr ${{ steps.ip.outputs.ipv4 }}/32
+
+
+     
+             

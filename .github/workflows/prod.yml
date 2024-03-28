@@ -1,9 +1,9 @@
 name: prod Tag Workflow
 
 on:
-  create:
+  push:
     tags:
-      - prod-'*'
+      - 'prod*'
 
 jobs:
   build-and-deploy:

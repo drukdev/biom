@@ -62,16 +62,10 @@ jobs:
           passphrase: ${{ secrets.EC2_INSTANCE_PASSPHRASE }}
           script: |
             docker login -u AWS -p "$(aws ecr get-login-password --region ap-southeast-1)" ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com
-            sudo docker stop biolatest || true
-            sudo docker rm -f biolatest || true
-            sudo docker rmi ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:biolatest
-            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:biolatest
             cd /home/ubuntu/workspace/biometric-service
-            sudo docker stop biolatest || true
-            sudo docker rm -f biolatest || true
-            sudo docker-compose -f /home/ubuntu/workspace/biometric-service/docker-compose.yml up -d
-            sudo docker images -f "dangling=true" -q | xargs -r sudo docker rmi
-
+            docker-compose pull biometric-service
+            docker-compose up -d biometric-service
+            sudo docker images -f "dangling=true" -q | xargs -r sudo docker rmi || echo 'No dangling images to remove'
 
       -  name: Revoke runner IP address
          run: |

@@ -1,14 +1,10 @@
 version: '3.4'
 services:
-  biometricservice:
+  biometric-service:
     image: ${IMAGE_NAME}
-    container_name: biometricservice
+    container_name: biometric-service
     ports:
       - "3001:3001"
     env_file:
       - .env
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f -o /dev/null -s ${HEALTH_CHECK_URL} || echo 1"]
-      interval: 10s
-      retries: 3
     restart: unless-stopped

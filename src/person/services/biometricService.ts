@@ -59,13 +59,8 @@ export class BiometricService {
           .getCitizenImg(biometricReq)
           .then((value: string) => Buffer.from(value, 'base64'));
       }
-      const compatibility: number =
-        (await this.biometricRepo.compareImage(image, personImg).then((value) => {
-          if (value != undefined) {
-            return value[2];
-          }
-        })) || undefined;
-
+      const compatibility: number = await this.biometricRepo.compareImage(image, personImg);
+        
       if (compatibility == undefined || null == compatibility) {
         returnResult.statusCode = CommonConstants.RESP_BAD_REQUEST;
         returnResult.error = 'Invalid Biometric';

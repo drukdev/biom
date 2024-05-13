@@ -23,7 +23,10 @@ export enum CommonConstants {
 
 export enum ServiceConstants {
   NATS_ENDPOINT = 'biometricService',
-  BM_VALIDATE_USER = 'validateUser'
+  BM_VALIDATE_USER = 'validateUser',
+  GET_BREADCRUMB = 'GET-BREADCRUMB',
+  BM_UPDATE_PERSON_METADATA= 'updatePersonMetadata',
+  BM_FETCH_DEVICE_ID= 'fetchDeviceId'
 }
 
 export enum NATSReconnects {

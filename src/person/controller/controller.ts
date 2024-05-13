@@ -4,7 +4,7 @@ import { MessagePattern } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { ResponseType } from '../../common/response.interface';
-import {  ServiceConstants } from '../../common/constants';
+import { ServiceConstants } from '../../common/constants';
 import { IdTypes } from '../../common/IdTypes';
 import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
@@ -36,9 +36,7 @@ export class PersonController {
     try {
       ndiLogger.log(`compareBiometric starts`);
 
-      // Base64 string to image
-      const imgBuffer: Buffer = Buffer.from(biometricReq.image, 'base64');
-      const result = await this.biometricService.compareImage(imgBuffer, biometricReq);
+      const result = await this.biometricService.compareImage(biometricReq);
       ndiLogger.log(`result : ${JSON.stringify(result)}`);
       ndiLogger.log(`compareBiometric ends`);
       return result;
@@ -63,12 +61,22 @@ export class PersonController {
       );
 
       // Base64 string to image
-      const imgBuffer: Buffer = Buffer.from(biometricReq.image, 'base64');
-      const result = await this.biometricService.compareImage(imgBuffer, biometricReq);
+      // const imgBuffer: Buffer = Buffer.from(biometricReq.image, 'base64');
+      const result = await this.biometricService.compareImage(biometricReq);
       ndiLogger.log(`result : ${JSON.stringify(result)}`);
       return result;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
+  }
+
+  @UseInterceptors(LoggingInterceptor)
+  @MessagePattern({
+    endpoint: `${ServiceConstants.NATS_ENDPOINT}/${ServiceConstants.GET_BREADCRUMB}`
+  })
+  async getBreadcrumb(personId: string): Promise<string> {
+    const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
+    ndiLogger.log(`Listened for pattern ${ServiceConstants.NATS_ENDPOINT}/${ServiceConstants.GET_BREADCRUMB}`);
+    return this.biometricService.getBreadcrumb(personId);
   }
 }

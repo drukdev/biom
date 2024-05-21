@@ -60,8 +60,6 @@ export class PersonController {
         )}`
       );
 
-      // Base64 string to image
-      // const imgBuffer: Buffer = Buffer.from(biometricReq.image, 'base64');
       const result = await this.biometricService.compareImage(biometricReq);
       ndiLogger.log(`result : ${JSON.stringify(result)}`);
       return result;

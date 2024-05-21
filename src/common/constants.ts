@@ -13,6 +13,7 @@ export enum CommonConstants {
   RESP_FAILURE_NOT_MATCHED = 'Data does not match',
   SERVER_ERROR = 'Error from biometric comparision',
   BAD_REQUEST = 'Bad Request',
+  UPDATE_METADATA_ERROR = 'Error in update person metadata',
 
   // SUCCESS MESSAGE
   RESP_SUCCESS_200 = 200,

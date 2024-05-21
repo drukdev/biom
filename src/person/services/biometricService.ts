@@ -9,7 +9,7 @@ import { AWS_S3_DIRECTORY, CommonConstants } from '../../common/constants';
 import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
 import { ResponseType } from '../../common/response.interface';
-import { BiometricReq, PersonDetails } from '../interface/person.interface';
+import { BiometricReq, PersonDetails, UpdatePersonDetails } from '../interface/person.interface';
 import { S3Service } from '../../aws-s3/s3.service';
 import { IdTypes } from '../../common/IdTypes';
 import { PersonMetadata } from '../response/oneToNSearchResponse';
@@ -139,10 +139,8 @@ export class BiometricService {
       }
     } catch (error) {
       ndiLogger.error(`error in biometric : ${error}`);
-      returnResult.statusCode = error.response.statusCode
-        ? error.response.statusCode
-        : HttpStatus.INTERNAL_SERVER_ERROR;
-      returnResult.error = error.response.error ? error.response.error : CommonConstants.SERVER_ERROR;
+      returnResult.statusCode = error.status ? error.status : HttpStatus.INTERNAL_SERVER_ERROR;
+      returnResult.error = error.response ? error.response : CommonConstants.SERVER_ERROR;
     }
     return returnResult;
   }
@@ -170,5 +168,47 @@ export class BiometricService {
     }
     ndiLogger.log(`Person details found`);
     return personDetails?.metadata?.breadcrumb;
+  }
+
+  async fetchDeviceId(personId: string): Promise<string> {
+    const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
+    const personDetails = await this.getPersonDetails(personId);
+    if (!personDetails) {
+      ndiLogger.error(`Person details not found`);
+      throw new RpcException({ message: 'Person details not found', code: HttpStatus.NOT_FOUND });
+    }
+    ndiLogger.log(`Person details found`);
+
+    return personDetails?.metadata?.deviceId;
+  }
+
+  public async updateMetadata(personMetaData: UpdatePersonDetails): Promise<ResponseType> {
+    const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
+    try {
+      const returnResult = {} as ResponseType;
+      const { personId } = personMetaData;
+      const fetchPersonDetails = await this.biometricRepo.fetchPersonDetails(personId);
+
+      if (personMetaData.deviceId) {
+        fetchPersonDetails.metadata['deviceId'] = personMetaData.deviceId;
+      }
+      if (null === personMetaData.breadcrumb || personMetaData.breadcrumb) {
+        fetchPersonDetails.metadata['breadcrumb'] = personMetaData.breadcrumb;
+      }
+
+      const updateMetaData = await this.biometricRepo.updatePersonMetadata(personId, fetchPersonDetails);
+
+      returnResult.statusCode = HttpStatus.OK;
+      returnResult.message = 'success';
+      returnResult.data = updateMetaData;
+      return returnResult;
+    } catch (error) {
+      ndiLogger.error(`Error while updating person metadata : ${error}`);
+      const statusCode = error.response.status ? error.response.status : HttpStatus.INTERNAL_SERVER_ERROR;
+      const errorMessage = error.response.statusText
+        ? error.response.statusText
+        : CommonConstants.UPDATE_METADATA_ERROR;
+      throw new RpcException({ message: errorMessage, code: statusCode });
+    }
   }
 }

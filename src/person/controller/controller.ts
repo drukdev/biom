@@ -10,7 +10,7 @@ import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
 import { AsyncLocalStorage } from 'async_hooks';
 import { LoggingInterceptor } from '../../logger/logging.interceptor';
-import { BiometricReq } from '../interface/person.interface';
+import { BiometricReq, UpdatePersonDetails } from '../interface/person.interface';
 
 @Controller()
 @ApiBearerAuth()
@@ -78,5 +78,22 @@ export class PersonController {
     const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
     ndiLogger.log(`Listened for pattern ${ServiceConstants.NATS_ENDPOINT}/${ServiceConstants.GET_BREADCRUMB}`);
     return this.biometricService.getBreadcrumb(personId);
+  }
+
+  @UseInterceptors(LoggingInterceptor)
+  @MessagePattern({
+    endpoint: `${ServiceConstants.NATS_ENDPOINT}/${ServiceConstants.BM_FETCH_DEVICE_ID}`
+  })
+  async fetchDeviceIdOfPerson(@Body() personId: string): Promise<string> {    
+    return this.biometricService.fetchDeviceId(personId);
+  }
+
+   @UseInterceptors(LoggingInterceptor)
+  @MessagePattern({
+    endpoint: `${ServiceConstants.NATS_ENDPOINT}/${ServiceConstants.BM_UPDATE_PERSON_METADATA}`
+  })
+  async updateMetadata(@Body() updateMetaData: UpdatePersonDetails): Promise<ResponseType> {
+    return this.biometricService.updateMetadata(updateMetaData);
+
   }
 }

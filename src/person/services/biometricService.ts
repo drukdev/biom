@@ -12,7 +12,7 @@ import { ResponseType } from '../../common/response.interface';
 import { BiometricReq, PersonDetails, UpdatePersonDetails } from '../interface/person.interface';
 import { S3Service } from '../../aws-s3/s3.service';
 import { IdTypes } from '../../common/IdTypes';
-import { PersonMetadata } from '../response/OneToNSearch';
+import { PersonMetadata } from '../response/searchResponse';
 import { RpcException } from '@nestjs/microservices';
 @Injectable()
 export class BiometricService {

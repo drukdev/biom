@@ -4,7 +4,7 @@ import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
 import { AsyncLocalStorage } from 'async_hooks';
 import { PersonDetails } from '../interface/person.interface';
-import { OneToNSearch, Person, PersonMetadata } from '../response/OneToNSearch';
+import { SearchResponse, Person, PersonMetadata } from '../response/searchResponse';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { FaceSdk, ImageSource } = require('@regulaforensics/facesdk-webclient');
 // eslint-disable-next-line
@@ -61,7 +61,7 @@ async searchImage(image: Buffer, idNumber: string): Promise<{ similarity: number
   const commonGroupId: string = this.configService.get('REGULA_GROUP_ID');
   const sdk = new FaceSdk({ basePath: apiBasePath });
 
-  const response: OneToNSearch = await sdk.searchApi.search({
+  const response: SearchResponse = await sdk.searchApi.search({
     image: { contentType: 'jpg', content: image },
     groupIds: [commonGroupId]
   });

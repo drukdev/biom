@@ -1,4 +1,4 @@
-export interface OneToNSearch {
+export interface SearchResponse {
     code:     number;
     persons:  Person[];
     metadata: OneToNSearchResponseMetadata;

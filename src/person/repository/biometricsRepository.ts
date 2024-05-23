@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
 import { AsyncLocalStorage } from 'async_hooks';
+import { PersonDetails } from '../interface/person.interface';
+import { SearchResponse, Person, PersonMetadata } from '../response/searchResponse';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { FaceSdk, ImageSource } = require('@regulaforensics/facesdk-webclient');
-
+// eslint-disable-next-line
+const md5 = require('md5');
 @Injectable()
 export class BiometricRepository {
   constructor(
@@ -39,4 +42,45 @@ export class BiometricRepository {
     ndiLogger.log(`result from third party service`);
     return matchingResponse.results.map((res: { similarity: number }) => res.similarity);
   }
+
+
+  async fetchPersonDetails(personId: string): Promise<PersonDetails> {
+    const apiBasePath = this.configService.get('BM_SDK_BASE_PATH');
+    const sdk = new FaceSdk({ basePath: apiBasePath });
+    return sdk.personApi.getPerson(personId);
+}
+async updatePersonMetadata(personId: string, updatePersonDetails: PersonDetails): Promise<PersonDetails> {
+  const apiBasePath = this.configService.get('BM_SDK_BASE_PATH');
+  const sdk = new FaceSdk({ basePath: apiBasePath });
+  return sdk.personApi.updatePerson(personId, updatePersonDetails);
+}
+
+async searchImage(image: Buffer, idNumber: string): Promise<{ similarity: number } & PersonMetadata | number> {
+  const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
+  const apiBasePath = this.configService.get('BM_SDK_BASE_PATH');
+  const commonGroupId: string = this.configService.get('REGULA_GROUP_ID');
+  const sdk = new FaceSdk({ basePath: apiBasePath });
+
+  const response: SearchResponse = await sdk.searchApi.search({
+    image: { contentType: 'jpg', content: image },
+    groupIds: [commonGroupId]
+  });
+  if (0 === response.persons.length) {
+    return HttpStatus.NOT_FOUND;
+  }
+  const matchPerson: Person | undefined = response.persons.find((person) => person.metadata.IDS.includes(md5(idNumber)));
+  if (matchPerson) {
+    delete matchPerson.metadata.IDS;
+    const res = {
+      similarity: matchPerson.images.reduce((acc, image) => Math.max(acc, image.similarity), -Infinity),
+      ...matchPerson.metadata,
+      idNumber,
+      personId: matchPerson.id
+    };
+    ndiLogger.log(`${JSON.stringify(res)}`);
+    return res;
+  }
+  return HttpStatus.AMBIGUOUS;
+
+}
 }

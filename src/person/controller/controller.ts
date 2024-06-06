@@ -37,9 +37,17 @@ export class PersonController {
       ndiLogger.log(`compareBiometric starts`);
 
       const result = await this.biometricService.compareImage(biometricReq);
-      ndiLogger.log(`result : ${JSON.stringify(result)}`);
+
+      const res: ResponseType = {
+        statusCode: result.statusCode,
+        message: result.message,
+        data: {
+          ...(result.data?.personId && {personId: result.data.personId})
+        }
+      };
+      
       ndiLogger.log(`compareBiometric ends`);
-      return result;
+      return res;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

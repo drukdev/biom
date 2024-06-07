@@ -14,7 +14,7 @@ import { S3Service } from '../../aws-s3/s3.service';
 import { IdTypes } from '../../common/IdTypes';
 import { PersonMetadata } from '../response/searchResponse';
 import { RpcException } from '@nestjs/microservices';
-import { getDateTime } from 'src/common/functions';
+import { getDateTime } from '../../common/functions';
 @Injectable()
 export class BiometricService {
   constructor(

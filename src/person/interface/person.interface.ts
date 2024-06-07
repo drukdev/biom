@@ -25,6 +25,7 @@ export interface UpdatePersonDetails {
   personId: string;
   deviceId?: string;
   breadcrumb?: string;
+  breadcrumbUpdatedAt?: string;
 }
 
 export interface PersonDetails {

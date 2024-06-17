@@ -9,7 +9,6 @@ export const validationSchema = Joi.object({
   CLIENT_ID: Joi.string().required(),
   CLIENT_SECRET: Joi.string().required(),
   GRANT_TYPE: Joi.string().required(),
-  CITIZEN_IMG: Joi.string().required(),
   IMMI_IMG: Joi.string().required(),
   THRESHOLD: Joi.string().required(),
   IMM_IMG_PP: Joi.string().required(),
@@ -24,8 +23,6 @@ export const validationSchema = Joi.object({
   LOG_LEVEL: Joi.string().required(),
   ELK_USERNAME: Joi.string().required(),
   ELK_PASSWORD: Joi.string().required(),
-  ROYAL_IMG: Joi.string().required(),
-  NDI_CITIZEN_IMG: Joi.string().required(),
   USERS_TEST_DATA_BUCKET: Joi.string().required(),
   AWS_ACCESS_KEY: Joi.string().required(),
   AWS_SECRET_ACCESS_KEY: Joi.string().required()

@@ -69,7 +69,7 @@ export class SystemRepository {
             throw new HttpException(
               {
                 statusCode: HttpStatus.NOT_FOUND,
-                error: 'Citizen data not found. Please update your record'
+                error: 'Image record not found. Please update your record'
               },
               HttpStatus.NOT_FOUND
             );
@@ -90,12 +90,6 @@ export class SystemRepository {
     let systemUrl: string;
 
     switch (idType.toLowerCase()) {
-      // Get Image by Citizenship
-      case IdTypes.Citizenship.toLowerCase():
-        systemUrl = `${this.configService.get('NDI_CITIZEN_IMG')}${idNumber}`;
-        ndiLogger.log(`Started to get citizen image using NDI_CITIZEN_IMG API`);
-        break;
-      // Get Image by Work Permit
       case IdTypes.WorkPermit.toLowerCase():
         systemUrl = `${this.configService.get('IMMI_IMG')}${idNumber}`;
         ndiLogger.log(`Started to get immigrant image using IMMI_IMG API`);
@@ -114,23 +108,6 @@ export class SystemRepository {
 
       return response;
     } catch (error) {
-      if (IdTypes.Citizenship.toLocaleLowerCase() === idType.toLocaleLowerCase()) {
-        try {
-          ndiLogger.log(`Started to get citizen image using CITIZEN_IMG API`);
-          systemUrl = `${this.configService.get('CITIZEN_IMG')}${idNumber}`;
-          return this.getUserImage(token, systemUrl, idType);
-        } catch (error) {
-          try {
-            ndiLogger.log('Getting royal user data');
-            systemUrl = `${this.configService.get('ROYAL_IMG')}${idNumber}`;
-            const response: Person | PersonDTO = await this.getUserImage(token, systemUrl, idType);
-            return response;
-          } catch (err) {
-            ndiLogger.error(`ERROR in getting royal user image : ${JSON.stringify(error.stack ? error.stack : error)}`);
-            this.checkError(err);
-          }
-        }
-      }
       ndiLogger.error(`ERROR in rest request : ${JSON.stringify(error)}`);
 
       this.checkError(error);
@@ -193,22 +170,6 @@ export class SystemRepository {
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
   getData(data: any, system: string): Person | PersonDTO {
     let result: Person | PersonDTO;
-    if (system.match(IdTypes.Citizenship)) {
-      if (data['ndicitizenimages']) {
-        if (
-          0 < Object.keys(data['ndicitizenimages']).length &&
-          data['ndicitizenimages']['ndicitizenimage'] &&
-          data['ndicitizenimages']['ndicitizenimage'][0]
-        ) {
-          // eslint-disable-next-line prefer-destructuring
-          result = data['ndicitizenimages']['ndicitizenimage'][0];
-        } else {
-          throw new HttpException('NDI citizen image not found', HttpStatus.BAD_REQUEST);
-        }
-      } else if (data['citizenimages']) {
-        result = 0 < Object.keys(data['citizenimages']).length ? data['citizenimages']['citizenimage'][0] : undefined;
-      }
-    }
     if (system.match(IdTypes.WorkPermit)) {
       result = 0 < Object.keys(data['ImmiImages']).length ? data['ImmiImages']['ImmiImage'][0] : undefined;
     }

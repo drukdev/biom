@@ -13,6 +13,7 @@ export enum CommonConstants {
   RESP_FAILURE_NOT_MATCHED = 'Data does not match',
   SERVER_ERROR = 'Error from biometric comparision',
   BAD_REQUEST = 'Bad Request',
+  UPDATE_METADATA_ERROR = 'Error in update person metadata',
 
   // SUCCESS MESSAGE
   RESP_SUCCESS_200 = 200,
@@ -23,7 +24,10 @@ export enum CommonConstants {
 
 export enum ServiceConstants {
   NATS_ENDPOINT = 'biometricService',
-  BM_VALIDATE_USER = 'validateUser'
+  BM_VALIDATE_USER = 'validateUser',
+  GET_BREADCRUMB = 'GET-BREADCRUMB',
+  BM_UPDATE_PERSON_METADATA= 'updatePersonMetadata',
+  BM_FETCH_DEVICE_ID= 'fetchDeviceId'
 }
 
 export enum NATSReconnects {

@@ -4,13 +4,13 @@ import { MessagePattern } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { ResponseType } from '../../common/response.interface';
-import {  ServiceConstants } from '../../common/constants';
+import { ServiceConstants } from '../../common/constants';
 import { IdTypes } from '../../common/IdTypes';
 import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
 import { AsyncLocalStorage } from 'async_hooks';
 import { LoggingInterceptor } from '../../logger/logging.interceptor';
-import { BiometricReq } from '../interface/person.interface';
+import { BiometricReq, UpdatePersonDetails } from '../interface/person.interface';
 
 @Controller()
 @ApiBearerAuth()
@@ -36,12 +36,18 @@ export class PersonController {
     try {
       ndiLogger.log(`compareBiometric starts`);
 
-      // Base64 string to image
-      const imgBuffer: Buffer = Buffer.from(biometricReq.image, 'base64');
-      const result = await this.biometricService.compareImage(imgBuffer, biometricReq);
-      ndiLogger.log(`result : ${JSON.stringify(result)}`);
+      const result = await this.biometricService.compareImage(biometricReq);
+
+      const res: ResponseType = {
+        statusCode: result.statusCode,
+        message: result.message,
+        data: {
+          ...(result.data?.personId && {personId: result.data.personId})
+        }
+      };
+      
       ndiLogger.log(`compareBiometric ends`);
-      return result;
+      return res;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
@@ -62,13 +68,38 @@ export class PersonController {
         )}`
       );
 
-      // Base64 string to image
-      const imgBuffer: Buffer = Buffer.from(biometricReq.image, 'base64');
-      const result = await this.biometricService.compareImage(imgBuffer, biometricReq);
+      const result = await this.biometricService.compareImage(biometricReq);
       ndiLogger.log(`result : ${JSON.stringify(result)}`);
       return result;
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
+  }
+
+  @UseInterceptors(LoggingInterceptor)
+  @MessagePattern({
+    endpoint: `${ServiceConstants.NATS_ENDPOINT}/${ServiceConstants.GET_BREADCRUMB}`
+  })
+  async getBreadcrumb(personId: string): Promise<string> {
+    const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
+    ndiLogger.log(`Listened for pattern ${ServiceConstants.NATS_ENDPOINT}/${ServiceConstants.GET_BREADCRUMB}`);
+    return this.biometricService.getBreadcrumb(personId);
+  }
+
+  @UseInterceptors(LoggingInterceptor)
+  @MessagePattern({
+    endpoint: `${ServiceConstants.NATS_ENDPOINT}/${ServiceConstants.BM_FETCH_DEVICE_ID}`
+  })
+  async fetchDeviceIdOfPerson(@Body() personId: string): Promise<string> {    
+    return this.biometricService.fetchDeviceId(personId);
+  }
+
+   @UseInterceptors(LoggingInterceptor)
+  @MessagePattern({
+    endpoint: `${ServiceConstants.NATS_ENDPOINT}/${ServiceConstants.BM_UPDATE_PERSON_METADATA}`
+  })
+  async updateMetadata(@Body() updateMetaData: UpdatePersonDetails): Promise<ResponseType> {
+    return this.biometricService.updateMetadata(updateMetaData);
+
   }
 }

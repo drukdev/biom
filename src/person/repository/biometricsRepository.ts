@@ -77,9 +77,10 @@ async searchImage(image: Buffer, idNumber: string): Promise<{ similarity: number
       idNumber,
       personId: matchPerson.id
     };
-    ndiLogger.log(`${JSON.stringify(res)}`);
+    ndiLogger.log(`${md5(idNumber)} : ${res.similarity}`);
     return res;
   }
+  ndiLogger.log(`${md5(idNumber)} : Not found`);
   return HttpStatus.AMBIGUOUS;
 
 }

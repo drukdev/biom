@@ -3,7 +3,7 @@ name: DEV Workflow
 on:
   push:
     branches:
-      - develop
+      - d1
 
 jobs:
   build-and-deploy:

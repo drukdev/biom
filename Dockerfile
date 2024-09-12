@@ -2,7 +2,7 @@
 # BUILD FOR PRODUCTION
 ###################
 
-FROM node:16-slim as build
+FROM node:18-slim as build
 RUN apt-get update
 RUN apt-get install -y openssl
 WORKDIR /usr/src/app
@@ -24,7 +24,7 @@ RUN yarn --prod
 # PRODUCTION
 ###################
 
-FROM node:16-slim 
+FROM node:18-slim 
 RUN apt-get update
 RUN apt-get install -y openssl
 

@@ -36,4 +36,4 @@ COPY --from=build /usr/src/app/dist ./dist
 EXPOSE 3001
 
 # Start the server using the production build
-CMD ["node", "/src/main"]
+CMD ["node", "dist/src/main"]

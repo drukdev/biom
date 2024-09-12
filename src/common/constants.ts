@@ -19,7 +19,17 @@ export enum CommonConstants {
   RESP_SUCCESS_200 = 200,
   RESP_SUCCESS_201 = 201,
   RESP_SUCCESS_204 = 204,
-  RESP_SUCCESS_MSG = 'success'
+  RESP_SUCCESS_MSG = 'success',
+
+  millisecondToSecond = 1000,
+  minusTokenExpiryTimeInSeconds = 300,
+  NDI_ACCESS_TOKEN_KEY = 'NDI_ACCESS_TOKEN_KEY',
+  HEADER_TYPE = 'application/x-www-form-urlencoded',
+  DCRC_ACCESS_TOKEN_KEY = 'DCRC_ACCESS_TOKEN_KEY',
+}
+
+export enum HeaderConstants {
+  HEADER_TYPE = 'application/x-www-form-urlencoded'
 }
 
 export enum ServiceConstants {

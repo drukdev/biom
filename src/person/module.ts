@@ -12,6 +12,7 @@ import { BiometricRepository } from './repository/biometricsRepository';
 import { SystemRepository } from './repository/systemRepository';
 import { BiometricService } from './services/biometricService';
 import { S3Service } from '../aws-s3/s3.service';
+import { DCRCAuthModule } from '../auth-token/DCRCAuthModule';
 
 
 @Module({
@@ -27,7 +28,8 @@ import { S3Service } from '../aws-s3/s3.service';
     HttpModule,
     NestjsFormDataModule,
     AlsModule,
-    LoggerModule
+    LoggerModule,
+    DCRCAuthModule
   ],
   controllers: [PersonController],
   providers: [BiometricService, NATSClientService, BiometricRepository, SystemRepository, S3Service]

@@ -1,8 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-
 import { AsyncLocalStorage } from 'async_hooks';
-
 import { BiometricRepository } from '../repository/biometricsRepository';
 import { SystemRepository } from '../repository/systemRepository';
 import { AWS_S3_DIRECTORY, CommonConstants } from '../../common/constants';
@@ -12,9 +10,13 @@ import { ResponseType } from '../../common/response.interface';
 import { BiometricReq, PersonDetails, UpdatePersonDetails } from '../interface/person.interface';
 import { S3Service } from '../../aws-s3/s3.service';
 import { IdTypes } from '../../common/IdTypes';
-import { PersonMetadata } from '../response/searchResponse';
+import { SearchImageResponse } from '../response/searchResponse';
 import { RpcException } from '@nestjs/microservices';
 import { getDateTime } from '../../common/functions';
+import { RegulaPersonDetails } from '../dto/regulaPersonDetails.dto';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const md5 = require('md5');
 @Injectable()
 export class BiometricService {
   constructor(
@@ -109,15 +111,32 @@ export class BiometricService {
 
     try {
       const inputImgBuffer: Buffer = Buffer.from(biometricReq.image, 'base64');
-      const compareResult: ({ similarity: number } & PersonMetadata) | number = await this.biometricRepo.searchImage(
+      let compareResult: SearchImageResponse | number = await this.biometricRepo.searchImage(
         inputImgBuffer,
         biometricReq.idNumber
       );
 
+      if (HttpStatus.NOT_FOUND === compareResult || HttpStatus.AMBIGUOUS === compareResult) {
+        ndiLogger.log('Searching record 1:1 way');
+        const personImgtemp = await this.systemRepository
+          .getCitizenImg(biometricReq);
+          const personImg = Buffer.from(personImgtemp, 'base64');
+          const similarity =  await this.biometricRepo.compareImage(inputImgBuffer, personImg);
+          const regulaData:RegulaPersonDetails = await this.systemRepository.getPersonIDFromRegula(biometricReq.idNumber);
+        if (regulaData?.pDetails?.pDetail[0] && regulaData?.pDetails?.pDetail[0].personid && regulaData?.pDetails?.pDetail[0].meta) {
+          ndiLogger.log(`similarity for ${md5(`${biometricReq.idNumber}`)}: ${similarity[0]}`);
+          compareResult = {
+            similarity: similarity[0],
+            ...JSON.parse(regulaData.pDetails.pDetail[0].meta),
+            idNumber: biometricReq.idNumber,
+            personId: regulaData.pDetails.pDetail[0].personid
+          };
+        }
+      }
+
       if (HttpStatus.NOT_FOUND === compareResult) {
         throw new HttpException('Person not found', HttpStatus.NOT_FOUND);
       }
-
       if (HttpStatus.AMBIGUOUS === compareResult) {
         throw new HttpException('Record is ambiguous', HttpStatus.AMBIGUOUS);
       }
@@ -213,4 +232,6 @@ export class BiometricService {
       throw new RpcException({ message: errorMessage, code: statusCode });
     }
   }
+
+
 }

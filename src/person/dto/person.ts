@@ -70,7 +70,7 @@ export class PersonDTO {
 
   @ValidateIf((obj) => false === obj.isBhutanese)
   @ApiProperty({
-    name: 'country' || 'Country',
+    name: 'country',
     type: String,
     example: 'Australia'
   })
@@ -97,7 +97,7 @@ export class PersonDTO {
   passport: string;
 
   @ApiProperty({
-    name: 'DOB' || 'dob',
+    name: 'DOB',
     type: Date,
     example: '1998-01-01+00:00'
   })

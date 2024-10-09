@@ -7,3 +7,10 @@ export interface ResponseType {
   error?: any;
   timestamp?: string;
 }
+
+export interface retryOptions {
+  retries: number;
+  factor: number;
+  minTimeout: number;
+  onRetry: (e: { message: string }, attempt: number) => void;
+}

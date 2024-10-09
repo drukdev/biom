@@ -23,7 +23,6 @@ export class LoggingInterceptor implements NestInterceptor {
     store.ndiLogger.setContext(JSON.parse(rpcContect.args[0]).endpoint);
     store.ndiLogger.setCorrelationId(headers._description);
 
-    store.ndiLogger.log('In Interceptor configuration');
     this.als.enterWith(store);
     //const now = Date.now();
     return next.handle().pipe(

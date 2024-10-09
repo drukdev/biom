@@ -4,7 +4,7 @@ import { NDILogger } from '../../logger/logger.service';
 import { LoggerClsStore } from '../../logger/logger.store';
 import { AsyncLocalStorage } from 'async_hooks';
 import { PersonDetails } from '../interface/person.interface';
-import { SearchResponse, Person, PersonMetadata } from '../response/searchResponse';
+import { SearchResponse, Person, SearchImageResponse } from '../response/searchResponse';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { FaceSdk, ImageSource } = require('@regulaforensics/facesdk-webclient');
 // eslint-disable-next-line
@@ -55,7 +55,8 @@ async updatePersonMetadata(personId: string, updatePersonDetails: PersonDetails)
   return sdk.personApi.updatePerson(personId, updatePersonDetails);
 }
 
-async searchImage(image: Buffer, idNumber: string): Promise<{ similarity: number } & PersonMetadata | number> {
+async searchImage(image: Buffer, idNumber: string): Promise<SearchImageResponse | number> {
+  // return HttpStatus.NOT_FOUND;
   const ndiLogger = this.ndiLogger.getLoggerInstance(this.als);
   const apiBasePath = this.configService.get('BM_SDK_BASE_PATH');
   const commonGroupId: string = this.configService.get('REGULA_GROUP_ID');
@@ -65,22 +66,25 @@ async searchImage(image: Buffer, idNumber: string): Promise<{ similarity: number
     image: { contentType: 'jpg', content: image },
     groupIds: [commonGroupId]
   });
+
+  ndiLogger.log(`Found no of records for ${md5(`${idNumber}`)} ${response.persons.length}`);
   if (0 === response.persons.length) {
     return HttpStatus.NOT_FOUND;
   }
   const matchPerson: Person | undefined = response.persons.find((person) => person.metadata.IDS.includes(md5(idNumber)));
   if (matchPerson) {
     delete matchPerson.metadata.IDS;
-    const res = {
+    const res: SearchImageResponse = {
       similarity: matchPerson.images.reduce((acc, image) => Math.max(acc, image.similarity), -Infinity),
       ...matchPerson.metadata,
       idNumber,
       personId: matchPerson.id
     };
-    ndiLogger.log(`${md5(idNumber)} : ${res.similarity}`);
+    ndiLogger.log(`similarity for ${md5(idNumber)} : ${res.similarity}`);
     return res;
   }
-  ndiLogger.log(`${md5(idNumber)} : Not found`);
+
+  ndiLogger.log(`AMBIGUOUS ${md5(idNumber)} : Not found`);
   return HttpStatus.AMBIGUOUS;
 
 }

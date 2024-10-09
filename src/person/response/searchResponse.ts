@@ -60,3 +60,13 @@ export interface PersonMetadata {
     breadcrumb: string;
     deviceId:   string;
 }
+
+
+export interface SearchImageResponse {
+    idNumber: string;
+    personId: string;
+    IDS: string[];
+    breadcrumb: string;
+    deviceId: string;
+    similarity: number;
+}

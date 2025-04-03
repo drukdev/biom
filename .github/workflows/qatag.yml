@@ -3,7 +3,7 @@ name: QA Tag Workflow
 on:
   push:
     tags:
-      - 'qa-'
+      - 'qa*'
 
 jobs:
   build-and-deploy:

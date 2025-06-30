@@ -36,7 +36,6 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/git/refs/tags/$TAG_NAME
           exit 1
 
-
       - name: Checkout code
         uses: actions/checkout@v2
 

@@ -35,7 +35,6 @@ jobs:
           curl -X DELETE -H "Authorization: token $GITHUB_TOKEN" \
             https://api.github.com/repos/${{ github.repository }}/git/refs/tags/$TAG_NAME
           exit 1
-
     
       - name: Checkout code
         uses: actions/checkout@v2
@@ -71,8 +70,8 @@ jobs:
           username: ${{ secrets.STAGE_SSH_USERNAME }}
           key: ${{ secrets.STAGE_SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.EC2_INSTANCE_PASSPHRASE }}
-          source: credebl-docker-compose.yml
-          target: /home/${{ secrets.STAGE_SSH_USERNAME }}/workspace/credebl-biometric-service/
+          source: docker-compose.yml
+          target: /home/${{ secrets.STAGE_SSH_USERNAME }}/workspace/biometric-service/
 
       
       - name: Log in to ECR
@@ -83,12 +82,12 @@ jobs:
       - name: Build and tag Docker image
         run: |
           docker build -t stagebiometricservice .
-          docker tag stagebiometricservice:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:credeblbiolatest
+          docker tag stagebiometricservice:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:latest
           
        
       - name: Push Docker image to AWS ECR
         run: 
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:credeblbiolatest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com/stagebiometricservice:latest
 
       - name: SSH into EC2 instance and pull Docker image
         uses: appleboy/ssh-action@master
@@ -99,9 +98,9 @@ jobs:
           passphrase: ${{ secrets.EC2_INSTANCE_PASSPHRASE }}
           script: |
             docker login -u AWS -p "$(aws ecr get-login-password --region ap-southeast-1)" ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.ap-southeast-1.amazonaws.com
-            cd /home/${{ secrets.STAGE_SSH_USERNAME }}/workspace/credebl-biometric-service
-            docker-compose -f ./credebl-docker-compose.yml pull credebl-biometric-service
-            docker-compose -f ./credebl-docker-compose.yml up -d credebl-biometric-service
+            cd /home/${{ secrets.STAGE_SSH_USERNAME }}/workspace/biometric-service
+            docker-compose pull biometric-service
+            docker-compose up -d biometric-service
             
 
       -  name: Revoke runner IP address

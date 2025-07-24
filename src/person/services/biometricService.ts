@@ -14,9 +14,11 @@ import { SearchImageResponse } from '../response/searchResponse';
 import { RpcException } from '@nestjs/microservices';
 import { getDateTime } from '../../common/functions';
 import { RegulaPersonDetails } from '../dto/regulaPersonDetails.dto';
+import { LicenseService } from '../../license/services/license.service';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const md5 = require('md5');
+const bill_status = [200, 201, 400, 404];
 @Injectable()
 export class BiometricService {
   constructor(
@@ -25,7 +27,8 @@ export class BiometricService {
     private readonly systemRepository: SystemRepository,
     private readonly als: AsyncLocalStorage<LoggerClsStore>,
     private readonly ndiLogger: NDILogger,
-    private readonly s3Service: S3Service
+    private readonly s3Service: S3Service,
+    private readonly licenseService: LicenseService
   ) {}
   public async compareImage(biometricReq: BiometricReq): Promise<ResponseType> {
     switch (biometricReq.idType) {
@@ -100,6 +103,10 @@ export class BiometricService {
       ndiLogger.error(`error in biometric : ${error}`);
       returnResult.statusCode = error.response.statusCode ? error.response.statusCode : CommonConstants.RESP_ERR_500;
       returnResult.error = error.response.error ? error.response.error : CommonConstants.SERVER_ERROR;
+    } finally {
+      if (bill_status.includes(returnResult.statusCode)) {
+        await this.licenseService.logUsage(biometricReq.orgdid, 0, 1, 0);
+      }
     }
     return returnResult;
   }
@@ -161,6 +168,10 @@ export class BiometricService {
       ndiLogger.error(`error in biometric : ${error}`);
       returnResult.statusCode = error.status ? error.status : HttpStatus.INTERNAL_SERVER_ERROR;
       returnResult.error = error.response ? error.response : CommonConstants.SERVER_ERROR;
+    } finally {
+      if (bill_status.includes(returnResult.statusCode)) {
+        await this.licenseService.logUsage(biometricReq.orgdid, 0, 0, 1);
+      }
     }
     return returnResult;
   }

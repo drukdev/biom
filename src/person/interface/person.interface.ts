@@ -18,6 +18,11 @@ export class BiometricReq {
   @IsNotEmpty({ message: 'image should not be empty' })
   @IsString({ message: 'The image is required.' })
   image: string;
+
+  @ApiProperty({ example: 'org123', name: 'orgdid' })
+  @IsNotEmpty({ message: 'orgdid should not be empty' })
+  @IsString({ message: 'The orgdid is required.' })
+  orgdid: string;
 }
 
 

@@ -15,6 +15,8 @@ import { PersonModule } from './person/module';
 import ExceptionHandler from './common/exception.handler';
 import { S3Module } from './aws-s3/s3.module';
 import { allowedHTTPMethods } from './common/constants';
+import { LicenseModule } from './license/module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -29,7 +31,9 @@ import { allowedHTTPMethods } from './common/constants';
     AuthModule,
     AlsModule,
     LoggerModule,
-    S3Module
+    S3Module,
+    LicenseModule,
+    HealthModule
   ],
   controllers: [HealthController],
   providers: [

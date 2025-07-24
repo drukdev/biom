@@ -1,0 +1,37 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model license_limit {
+  orgdid           String    @id
+  usage            Int
+  balance          Int
+  threshold        Int
+  reset_datetime   DateTime
+  orgadmin         String
+  lastupdated      DateTime  @default(now())
+  license_log      license_log[]
+}
+
+model license_log {
+  id                  Int       @id @default(autoincrement())
+  orgdid              String
+  liveliness_count    Int
+  match_count         Int
+  search_count        Int
+  transaction_datetime DateTime
+  counted             Boolean   @default(false)
+  lastupdated         DateTime  @default(now())
+  license_limit       license_limit @relation(fields: [orgdid], references: [orgdid])
+
+  @@index([orgdid])
+  @@index([transaction_datetime])
+}

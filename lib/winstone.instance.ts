@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { existsSync, mkdirSync } from 'fs';
 const ecsFormat = require('@elastic/ecs-winston-format');
 const { ElasticsearchTransport } = require('winston-elasticsearch');

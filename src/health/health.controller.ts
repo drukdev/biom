@@ -10,6 +10,7 @@ import {
 } from '@nestjs/terminus';
 import { nkeyAuthenticator } from 'nats';
 import { ConfigService } from '@nestjs/config';
+import { PrismaHealthIndicator } from './prisma.health';
 
 @Controller('health')
 export class HealthController {
@@ -17,7 +18,8 @@ export class HealthController {
     private health: HealthCheckService,
     private microservice: MicroserviceHealthIndicator,
     private http: HttpHealthIndicator,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private prismaHealth: PrismaHealthIndicator,
   ) {}
 
   @Get()
@@ -32,7 +34,8 @@ export class HealthController {
               this.configService.get('NKEY_SEED')
             ))
           }
-        })
+        }),
+      async (): Promise<HealthIndicatorResult> => this.prismaHealth.isHealthy('prisma'),
     ]);
   }
 }

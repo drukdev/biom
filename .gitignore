@@ -43,3 +43,5 @@ logs/log.json
 package-lock.json
 yarn.lock
 .env
+
+/generated/prisma

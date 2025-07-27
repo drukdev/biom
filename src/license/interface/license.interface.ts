@@ -16,5 +16,6 @@ export interface LicenseLog {
   search_count: number;
   transaction_datetime: Date;
   counted: boolean;
+  response_from_server?: string;
   lastupdated: Date;
 }

@@ -11,6 +11,7 @@ import {
 import { nkeyAuthenticator } from 'nats';
 import { ConfigService } from '@nestjs/config';
 import { PrismaHealthIndicator } from './prisma.health';
+import { LicenseHealthIndicator } from './license.health';
 
 @Controller('health')
 export class HealthController {
@@ -20,6 +21,7 @@ export class HealthController {
     private http: HttpHealthIndicator,
     private readonly configService: ConfigService,
     private prismaHealth: PrismaHealthIndicator,
+    private licenseHealth: LicenseHealthIndicator,
   ) {}
 
   @Get()
@@ -36,6 +38,7 @@ export class HealthController {
           }
         }),
       async (): Promise<HealthIndicatorResult> => this.prismaHealth.isHealthy('prisma'),
+      async (): Promise<HealthIndicatorResult> => this.licenseHealth.isHealthy('license'),
     ]);
   }
 }

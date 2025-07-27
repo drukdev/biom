@@ -22,11 +22,25 @@ export class LicenseRepository {
     return this.prisma.license_limit.delete({ where: { orgdid } });
   }
 
-  async createLicenseLog(data: Omit<LicenseLog, 'id' | 'lastupdated' | 'counted' | 'transaction_datetime'>): Promise<LicenseLog> {
+  async createLicenseLog(data: Omit<LicenseLog, 'id' | 'lastupdated' | 'counted' | 'transaction_datetime' | 'response_from_server'> & { response_from_server?: string }): Promise<LicenseLog> {
     return this.prisma.license_log.create({
       data: {
         ...data,
         transaction_datetime: new Date(),
+      },
+    });
+  }
+
+  async markLicenseLogsAsCounted(orgdid: string, reset_datetime: Date): Promise<void> {
+    await this.prisma.license_log.updateMany({
+      where: {
+        orgdid,
+        transaction_datetime: {
+          lt: reset_datetime,
+        },
+      },
+      data: {
+        counted: true,
       },
     });
   }

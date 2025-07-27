@@ -1,7 +1,8 @@
-import { Body, Controller, Post, UseGuards, Get, Param } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Get, Param, Put } from '@nestjs/common';
 import { LicenseService } from '../services/license.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { LicenseLimit } from '../interface/license.interface';
 
 @Controller('license')
 @ApiBearerAuth()
@@ -39,14 +40,37 @@ export class LicenseController {
       liveliness_count?: number;
       match_count?: number;
       search_count?: number;
+      response_from_server?: string;
     },
   ): Promise<void> {
-    const { orgdid, liveliness_count, match_count, search_count } = body;
+    const { orgdid, liveliness_count, match_count, search_count, response_from_server } = body;
     return this.licenseService.logUsage(
       orgdid,
       liveliness_count,
       match_count,
       search_count,
+      response_from_server,
     );
+  }
+
+  @Put('renew/:orgdid')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({
+    summary: 'Renews a license for an organization',
+    description: 'This endpoint renews a license and resets the usage.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The license has been successfully renewed.',
+  })
+  async renewSubscription(
+    @Param('orgdid') orgdid: string,
+    @Body()
+    body: {
+      renew_subscription?: boolean;
+    },
+  ): Promise<LicenseLimit> {
+    const { renew_subscription } = body;
+    return this.licenseService.renewSubscription(orgdid, renew_subscription);
   }
 }

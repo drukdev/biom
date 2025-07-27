@@ -17,7 +17,7 @@ model license_limit {
   threshold        Int
   reset_datetime   DateTime
   orgadmin         String
-  lastupdated      DateTime  @default(now())
+  lastupdated      DateTime  @updatedAt
   license_log      license_log[]
 }
 
@@ -29,7 +29,8 @@ model license_log {
   search_count        Int
   transaction_datetime DateTime
   counted             Boolean   @default(false)
-  lastupdated         DateTime  @default(now())
+  response_from_server String?
+  lastupdated         DateTime  @updatedAt
   license_limit       license_limit @relation(fields: [orgdid], references: [orgdid])
 
   @@index([orgdid])

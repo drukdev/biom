@@ -11,6 +11,7 @@ describe('LicenseService', () => {
     getLicenseLimit: jest.fn(),
     createLicenseLog: jest.fn(),
     updateLicenseLimit: jest.fn(),
+    markLicenseLogsAsCounted: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -97,16 +98,73 @@ describe('LicenseService', () => {
         lastupdated: new Date(),
       };
       mockLicenseRepository.getLicenseLimit.mockResolvedValue(licenseLimit);
-      await service.logUsage('orgdid1', 1, 2, 3);
+      await service.logUsage('orgdid1', 1, 2, 3, 'response');
       expect(repository.createLicenseLog).toHaveBeenCalledWith({
         orgdid: 'orgdid1',
         liveliness_count: 1,
         match_count: 2,
         search_count: 3,
+        response_from_server: 'response',
       });
       expect(repository.updateLicenseLimit).toHaveBeenCalledWith('orgdid1', {
         usage: 53,
         balance: 97,
+      });
+    });
+
+    it('should send an email alert when usage reaches the threshold', async () => {
+      const licenseLimit: LicenseLimit = {
+        orgdid: 'orgdid1',
+        usage: 78,
+        balance: 100,
+        threshold: 80,
+        reset_datetime: new Date(),
+        orgadmin: 'admin@org.com',
+        lastupdated: new Date(),
+      };
+      mockLicenseRepository.getLicenseLimit.mockResolvedValue(licenseLimit);
+      const consoleSpy = jest.spyOn(console, 'log');
+      await service.logUsage('orgdid1', 1, 2, 3);
+      expect(consoleSpy).toHaveBeenCalledWith('Sending email alert to admin@org.com');
+    });
+  });
+
+  describe('renewSubscription', () => {
+    it('should renew the subscription and mark logs as counted', async () => {
+      const licenseLimit: LicenseLimit = {
+        orgdid: 'orgdid1',
+        usage: 100,
+        balance: 100,
+        threshold: 80,
+        reset_datetime: new Date(),
+        orgadmin: 'admin@org.com',
+        lastupdated: new Date(),
+      };
+      mockLicenseRepository.getLicenseLimit.mockResolvedValue(licenseLimit);
+      mockLicenseRepository.markLicenseLogsAsCounted = jest.fn();
+      await service.renewSubscription('orgdid1', true);
+      expect(repository.markLicenseLogsAsCounted).toHaveBeenCalledWith('orgdid1', licenseLimit.reset_datetime);
+      expect(repository.updateLicenseLimit).toHaveBeenCalledWith('orgdid1', {
+        reset_datetime: expect.any(Date),
+      });
+    });
+
+    it('should not mark logs as counted if renew_subscription is false', async () => {
+      const licenseLimit: LicenseLimit = {
+        orgdid: 'orgdid1',
+        usage: 100,
+        balance: 100,
+        threshold: 80,
+        reset_datetime: new Date(),
+        orgadmin: 'admin@org.com',
+        lastupdated: new Date(),
+      };
+      mockLicenseRepository.getLicenseLimit.mockResolvedValue(licenseLimit);
+      mockLicenseRepository.markLicenseLogsAsCounted = jest.fn();
+      await service.renewSubscription('orgdid1', false);
+      expect(repository.markLicenseLogsAsCounted).not.toHaveBeenCalled();
+      expect(repository.updateLicenseLimit).toHaveBeenCalledWith('orgdid1', {
+        reset_datetime: expect.any(Date),
       });
     });
   });

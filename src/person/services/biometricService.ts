@@ -105,7 +105,7 @@ export class BiometricService {
       returnResult.error = error.response.error ? error.response.error : CommonConstants.SERVER_ERROR;
     } finally {
       if (bill_status.includes(returnResult.statusCode)) {
-        await this.licenseService.logUsage(biometricReq.orgdid, 0, 1, 0);
+        await this.licenseService.logUsage(biometricReq.orgdid, 0, 1, 0, JSON.stringify(returnResult));
       }
     }
     return returnResult;
@@ -169,8 +169,8 @@ export class BiometricService {
       returnResult.statusCode = error.status ? error.status : HttpStatus.INTERNAL_SERVER_ERROR;
       returnResult.error = error.response ? error.response : CommonConstants.SERVER_ERROR;
     } finally {
-      if (bill_status.includes(returnResult.statusCode)) {
-        await this.licenseService.logUsage(biometricReq.orgdid, 0, 0, 1);
+.      if (bill_status.includes(returnResult.statusCode)) {
+        await this.licenseService.logUsage(biometricReq.orgdid, 0, 0, 1, JSON.stringify(returnResult));
       }
     }
     return returnResult;

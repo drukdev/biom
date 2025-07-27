@@ -25,6 +25,7 @@ export class LicenseService {
     liveliness_count = 0,
     match_count = 0,
     search_count = 0,
+    response_from_server?: string,
   ): Promise<void> {
     const session_count = Math.max(liveliness_count, match_count, search_count);
 
@@ -33,6 +34,7 @@ export class LicenseService {
       liveliness_count,
       match_count,
       search_count,
+      response_from_server,
     });
 
     const licenseLimit = await this.licenseRepository.getLicenseLimit(orgdid);
@@ -52,12 +54,11 @@ export class LicenseService {
     }
   }
 
-  async renewSubscription(orgdid: string): Promise<LicenseLimit> {
+  async renewSubscription(orgdid: string, renew_subscription = false): Promise<LicenseLimit> {
     const licenseLimit = await this.licenseRepository.getLicenseLimit(orgdid);
 
-    if (licenseLimit) {
-      // This is a placeholder for the logic to mark all license_log entries as counted = true
-      // and update the lastupdated timestamp.
+    if (licenseLimit && renew_subscription) {
+      await this.licenseRepository.markLicenseLogsAsCounted(orgdid, licenseLimit.reset_datetime);
     }
 
     return this.licenseRepository.updateLicenseLimit(orgdid, {
@@ -67,6 +68,7 @@ export class LicenseService {
 
   private sendEmailAlert(orgadmin: string): void {
     // This is a placeholder for the email alert logic.
+    // In a real application, this would use a service like Nodemailer to send an email.
     console.log(`Sending email alert to ${orgadmin}`);
   }
 }
